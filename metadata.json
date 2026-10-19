@@ -1,0 +1,6 @@
+{
+  "name": "Cổng Bệnh Nhân - Bệnh Viện & Phòng Khám Thông Minh",
+  "description": "Cổng thông tin và đặt khám điện tử dành riêng cho bệnh nhân: quản lý hồ sơ sức khỏe, tìm kiếm bác sĩ chuyên khoa, đặt lịch khám, theo dõi kết quả, đơn thuốc, hóa đơn và nhận thông báo theo thời gian thực.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
