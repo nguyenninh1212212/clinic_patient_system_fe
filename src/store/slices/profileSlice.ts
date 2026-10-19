@@ -1,7 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { DoctorDTO } from '../../types';
+import { DoctorDTO } from '@/types/index';
+import { logoutAction, setCredentials, loginAsDemo, setUser } from '@/store/slices/authSlice';
 
 interface ProfileState {
+  defaultPatientId: string | null;
   activePatientId: string | null;
   activePatientName: string | null;
   activePatientCode: string | null;
@@ -10,6 +12,7 @@ interface ProfileState {
 }
 
 const initialState: ProfileState = {
+  defaultPatientId: null,
   activePatientId: null,
   activePatientName: null,
   activePatientCode: null,
@@ -20,6 +23,12 @@ const initialState: ProfileState = {
 export const profileSlice = createSlice({
   name: 'profile',
   initialState,
+  extraReducers: builder => {
+    builder.addCase(logoutAction, () => initialState)
+      .addCase(setCredentials, () => initialState)
+      .addCase(loginAsDemo, () => initialState)
+      .addCase(setUser, () => initialState);
+  },
   reducers: {
     setActiveProfile: (
       state,
@@ -30,6 +39,21 @@ export const profileSlice = createSlice({
         isRelative: boolean;
       }>
     ) => {
+      state.activePatientId = action.payload.patientId;
+      state.activePatientName = action.payload.patientName;
+      state.activePatientCode = action.payload.patientCode || null;
+      state.isRelative = action.payload.isRelative;
+    },
+    setDefaultProfile: (
+      state,
+      action: PayloadAction<{
+        patientId: string;
+        patientName: string;
+        patientCode?: string;
+        isRelative: boolean;
+      }>
+    ) => {
+      state.defaultPatientId = action.payload.patientId;
       state.activePatientId = action.payload.patientId;
       state.activePatientName = action.payload.patientName;
       state.activePatientCode = action.payload.patientCode || null;
@@ -52,6 +76,7 @@ export const profileSlice = createSlice({
 
 export const {
   setActiveProfile,
+  setDefaultProfile,
   clearActiveProfile,
   setSelectedDoctorForBooking,
 } = profileSlice.actions;

@@ -10,7 +10,7 @@ import {
   PrescriptionDTO,
   PrescriptionItemDTO,
   SpecialtyDTO,
-} from '../types';
+} from '@/types/index';
 
 export const demoMedicines: MedicineDTO[] = [
   { id: 'med-001', name: 'Amlodipine 5mg', genericName: 'Amlodipine besylate', unit: 'Viên' },

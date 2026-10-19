@@ -60,9 +60,6 @@ npm run dev
 6. **Quản lý Hóa đơn (Invoices Management)**:
    - `GET /invoices?page={page}&limit={limit}`: Danh sách hóa đơn phân trang.
    - `GET /invoices/:id`: Xem chi tiết hóa đơn, thông tin người mua, bệnh nhân và từng dòng hàng.
-   - `POST /invoices`: Lập hóa đơn viện phí mới kèm nhiều dòng hàng hóa (`itemType`: `MEDICINE` hoặc `COST`), hỗ trợ tính tạm tổng tiền trên giao diện và ghi nhận giá trị chính thức từ backend.
-   - `GET /invoices/export?id={id}`: Tải bảng kê Excel cho 1 hóa đơn hoặc xuất toàn bộ hóa đơn.
-   - `POST /invoices/import`: Nhập danh sách hóa đơn từ file Excel dạng `multipart/form-data` với trường `file`.
    - Tuân thủ yêu cầu: Backend chưa có API cập nhật hoặc xóa hóa đơn, giao diện không hiển thị 2 thao tác này.
 7. **Quản lý Đơn thuốc (Prescriptions Management)**:
    - `GET /prescriptions?page={page}&limit={limit}&issuedAt={YYYY-MM-DD}`: Danh sách đơn thuốc phân trang, có lọc theo ngày cấp `issuedAt` và lọc client-side theo `pharmacyStatus`.

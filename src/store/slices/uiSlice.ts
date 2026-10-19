@@ -1,3 +1,4 @@
+import { restoreCurrentTab } from '../tabPersistence';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export type AppTab =
@@ -26,7 +27,7 @@ interface UiState {
 }
 
 const initialState: UiState = {
-  currentTab: 'dashboard',
+  currentTab: restoreCurrentTab(),
   mobileSidebarOpen: false,
   notificationDrawerOpen: false,
   serverConfigModalOpen: false,

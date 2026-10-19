@@ -1,7 +1,7 @@
 import React from 'react';
 import { Snackbar, Alert, AlertTitle, Typography } from '@mui/material';
-import { useAppDispatch, useAppSelector } from '../../store';
-import { hideRealtimeToast } from '../../store/slices/uiSlice';
+import { useAppDispatch, useAppSelector } from '@/store/index';
+import { hideRealtimeToast } from '@/store/slices/uiSlice';
 
 export const ToastSnackbar: React.FC = () => {
   const dispatch = useAppDispatch();

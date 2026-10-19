@@ -15,12 +15,12 @@ import {
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorOutlinedIcon from '@mui/icons-material/ErrorOutlined';
-import { useAppDispatch, useAppSelector } from '../../store';
+import { useAppDispatch, useAppSelector } from '@/store/index';
 import {
   setCustomApiBaseUrl,
   setServerConfigModalOpen,
-} from '../../store/slices/uiSlice';
-import { updateApiBaseUrl } from '../../api/client';
+} from '@/store/slices/uiSlice';
+import { updateApiBaseUrl } from '@/api/axios';
 import axios from 'axios';
 
 export const BackendStatusModal: React.FC = () => {

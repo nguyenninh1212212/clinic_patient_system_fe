@@ -16,10 +16,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import CircleIcon from '@mui/icons-material/Circle';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
-import { useAppDispatch, useAppSelector } from '../../store';
-import { setNotificationDrawerOpen } from '../../store/slices/uiSlice';
+import { useAppDispatch, useAppSelector } from '@/store/index';
+import { setNotificationDrawerOpen } from '@/store/slices/uiSlice';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { notificationsApi } from '../../api/notifications';
+import { notificationsApi } from '@/api/endpoints/notifications.api';
 
 export const NotificationDrawer: React.FC = () => {
   const dispatch = useAppDispatch();
