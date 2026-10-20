@@ -2,7 +2,7 @@ import { apiClient } from '@/api/axios';
 import { AuthResponse, IUser } from '@/types/index';
 
 export const authApi = {
-  login: (credentials: { email: string; password: string }): Promise<AuthResponse> =>
+  login: (credentials: { identifier: string; password: string }): Promise<AuthResponse> =>
     apiClient.post<AuthResponse>('/auth/login', credentials, {
       timeout: 3000,
     }).then((r) => r.data),
@@ -16,8 +16,10 @@ export const authApi = {
       timeout: 3000,
     }).then((r) => r.data),
 
-  getMe: (): Promise<IUser> =>
-    apiClient.get<IUser>('/auth/me').then((r) => r.data),
+  getMe: (accessToken?: string): Promise<IUser> =>
+    apiClient.get<IUser>('/auth/me', {
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    }).then((r) => r.data),
 
   refreshToken: (): Promise<{ accessToken: string }> =>
     apiClient.post<{ accessToken: string }>(

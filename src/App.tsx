@@ -40,6 +40,7 @@ import { NotificationDrawer } from "@/components/common/NotificationDrawer";
 import { BackendStatusModal } from "@/components/common/BackendStatusModal";
 import { ToastSnackbar } from "@/components/common/ToastSnackbar";
 import { AuthPage } from "@/features/auth/pages/AuthPage";
+import { AuthCallbackPage } from "@/features/auth/pages/AuthCallbackPage";
 import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
 import { ProfilePage } from "@/features/profile/pages/ProfilePage";
 import { DoctorDirectoryPage } from "@/features/documentation/doctors/pages/DoctorDirectoryPage";
@@ -56,8 +57,13 @@ const AppContent: React.FC = () => {
     (state) => state.auth,
   );
   const { currentTab } = useAppSelector((state) => state.ui);
+  const isAuthCallback = window.location.pathname === "/auth/callback";
 
   useEffect(() => {
+    if (isAuthCallback) {
+      dispatch(setInitializing(false));
+      return;
+    }
     let isMounted = true;
     const restoreSession = async () => {
       try {
@@ -84,7 +90,7 @@ const AppContent: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [dispatch]);
+  }, [dispatch, isAuthCallback]);
 
   useEffect(() => {
     if (isAuthenticated && accessToken) {
@@ -108,6 +114,10 @@ const AppContent: React.FC = () => {
       disconnectNotificationsSocket();
     };
   }, [isAuthenticated, accessToken, dispatch]);
+
+  if (isAuthCallback) {
+    return <AuthCallbackPage />;
+  }
 
   if (isInitializing) {
     return (

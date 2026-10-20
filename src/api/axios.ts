@@ -7,7 +7,7 @@ export const getApiBaseUrl = (): string => {
     const saved = localStorage.getItem('PATIENT_PORTAL_API_URL');
     if (saved) return saved;
   }
-  return import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+  return import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
 };
 
 
