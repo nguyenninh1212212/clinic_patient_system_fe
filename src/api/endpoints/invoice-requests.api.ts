@@ -25,7 +25,7 @@ function entity(value: unknown): InvoiceDTO {
 export const invoiceEndpoints = {
   list: (params: InvoiceFilters = {}): Promise<PaginatedList<InvoiceDTO>> =>
     requireStaff()
-      .then(() => apiClient.get('/invoices', { params: { page: 1, limit: 10, ...params } }))
+      .then(() => apiClient.get('/legacy/invoices', { params: { page: 1, limit: 10, ...params } }))
       .then((r) => {
         const result = r.data;
         if (!Array.isArray(result?.data) || !result.pagination) {
@@ -36,26 +36,26 @@ export const invoiceEndpoints = {
 
   detail: (id: string): Promise<InvoiceDTO> =>
     requireStaff()
-      .then(() => apiClient.get(`/invoices/${encodeURIComponent(id)}`))
+      .then(() => apiClient.get(`/legacy/invoices/${encodeURIComponent(id)}`))
       .then((r) => entity(r.data)),
 
   create: (payload: CreateInvoicePayload): Promise<InvoiceDTO> =>
     requireStaff()
-      .then(() => apiClient.post('/invoices', payload))
+      .then(() => apiClient.post('/legacy/invoices', payload))
       .then((r) => entity(r.data)),
 
   importExcel: (file: File): Promise<{ message?: string }> =>
     requireStaff().then(() => {
       const body = new FormData();
       body.append('file', file);
-      return apiClient.post('/invoices/import', body, {
+      return apiClient.post('/legacy/invoices/import', body, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
     }).then((r) => r.data),
 
   exportExcel: (id?: string): Promise<void> =>
     requireStaff()
-      .then(() => apiClient.get('/invoices/export', { params: { id }, responseType: 'blob' }))
+      .then(() => apiClient.get('/legacy/invoices/export', { params: { id }, responseType: 'blob' }))
       .then((r) => {
         const url = URL.createObjectURL(r.data);
         const anchor = document.createElement('a');

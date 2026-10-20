@@ -31,7 +31,7 @@ export function useCheckAccess(patientId: string, linked: boolean) {
     gcTime: 0,
   });
   useEffect(() => {
-    if (!linked || query.isError || (query.isSuccess && (!query.data || query.data.createdBy !== user?.id))) {
+    if (!linked || query.isError || (query.isSuccess && (!query.data || query.data.userId !== user?.id))) {
       const prefix = ['patient-portal', user?.id ?? '', patientId];
       void client.cancelQueries({ queryKey: prefix, predicate: q => q.queryKey[3] !== 'access' });
       client.removeQueries({ queryKey: prefix, predicate: q => q.queryKey[3] !== 'access' });

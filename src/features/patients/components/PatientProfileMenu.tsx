@@ -16,6 +16,7 @@ import { setActiveProfile } from "@/store/slices/profileSlice";
 import type { PatientDTO } from "@/types";
 import type { PatientRecipient } from "../schemas/patient.schema";
 import {
+  useAccessiblePatients,
   useCreatePatient,
   useCreatePatientForMySelf,
   useMyPatient,
@@ -36,11 +37,15 @@ export function PatientProfileMenu({ anchorEl, onClose }: Props) {
     (state) => state.profile.activePatientId,
   );
   const self = useMyPatient();
-  const patient = self.data?.data;
+  const patient = self.data || undefined;
+  const accessible = useAccessiblePatients();
+  const relatives = (accessible.data?.data || []).filter(
+    (item) => item.userId === user?.id && item.patientId !== patient?.id,
+  );
   const { defaultPatientId, chooseDefault } = useDefaultPatientProfile(
     patient,
-    undefined,
-    self.isSuccess,
+    accessible.data?.data || [],
+    self.isSuccess && accessible.isSuccess,
   );
   const [recipient, setRecipient] = useState<PatientRecipient | null>(null);
   const createSelf = useCreatePatientForMySelf();
@@ -179,6 +184,7 @@ export function PatientProfileMenu({ anchorEl, onClose }: Props) {
           <AddIcon fontSize="small" />
           Tạo hồ sơ người thân
         </MenuItem>
+        {relatives.flatMap((item) => profileItems(item.patient, true))}
       </Menu>
       <PatientProfileDialog
         open={recipient !== null}

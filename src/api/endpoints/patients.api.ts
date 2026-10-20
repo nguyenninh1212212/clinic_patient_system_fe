@@ -8,8 +8,8 @@ import {
 } from "@/types/index";
 
 export const patientsApi = {
-  getMyPatient: (): Promise<ApiResponse<PatientDTO>> =>
-    apiClient.get<ApiResponse<PatientDTO>>("/patients/me").then((r) => r.data),
+  getMyPatient: (): Promise<PatientDTO> =>
+    apiClient.get("/patients/me").then((r) => r.data.data),
 
   getMyAccessiblePatients: (): Promise<ApiResponse<AccessDTO[]>> =>
     apiClient

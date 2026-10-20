@@ -1,3 +1,4 @@
+import { CommerceInvoicesPage, PatientPrescriptionPurchases } from '@/features/commerce/CommercePages';
 import { Alert, Paper, Stack, Typography } from "@mui/material";
 import { PatientPage, patientPages } from "@/routes/access";
 import { AccessDTO } from "@/types/index";
@@ -19,6 +20,8 @@ export function PatientRecordsPage({
   page: PatientPage;
   profile: AccessDTO["patient"];
 }) {
+  if(page==='prescriptions') return <PatientPrescriptionPurchases key={profile.id} patientId={profile.id}/>;
+  if(page==='invoices') return <CommerceInvoicesPage key={profile.id} patientId={profile.id}/>;
   return (
     <Paper sx={{ p: 3 }}>
       <Stack spacing={2}>

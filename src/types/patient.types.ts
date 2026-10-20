@@ -18,7 +18,8 @@ export interface PatientDTO {
 export interface AccessDTO {
   id: string;
   patientId: string;
-  createdBy: string;
+  createdBy?: string;
+  userId: string;
   createdAt: string;
   patient: {
     id: string;
