@@ -1,3 +1,4 @@
+import { InvoicesPage } from "@/features/invoices/pages/InvoicesPage";
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -9,6 +10,7 @@ import {
   CssBaseline,
   Box,
   CircularProgress,
+  Alert,
 } from "@mui/material";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/api/queryClient";
@@ -27,6 +29,7 @@ import {
   logoutAction,
   setInitializing,
 } from "@/store/slices/authSlice";
+import { setCurrentTab, type AppTab } from "@/store/slices/uiSlice";
 import { showRealtimeToast } from "@/store/slices/uiSlice";
 import {
   connectNotificationsSocket,
@@ -48,16 +51,75 @@ import { BookingPage } from "@/features/appointments/pages/BookingPage";
 import { MyAppointmentsPage } from "@/features/appointments/pages/MyAppointmentsPage";
 import { ExaminationsPage } from "@/features/examinations/pages/ExaminationsPage";
 import { PrescriptionsPage } from "@/features/prescriptions/pages/PrescriptionsPage";
-import { InvoicesPage } from "@/features/invoices/pages/InvoicesPage";
 import { ApiAuditPage } from "@/features/documentation/pages/ApiAuditPage";
+
+import { PatientPortal } from "@/features/patient-portal/components/PatientPortal";
+import { patientTabPaths } from "@/store/tabPersistence";
+import { resolveRoute } from "@/routes/access";
 
 const AppContent: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { isAuthenticated, isInitializing, accessToken } = useAppSelector(
+  const { isAuthenticated, isInitializing, accessToken, user } = useAppSelector(
     (state) => state.auth,
   );
   const { currentTab } = useAppSelector((state) => state.ui);
   const isAuthCallback = window.location.pathname === "/auth/callback";
+  const [pathname, setPathname] = useState(window.location.pathname);
+  useEffect(() => {
+    let readingUrl = false;
+    let previousTab = store.getState().ui.currentTab;
+    const syncFromUrl = () => {
+      const path = window.location.pathname;
+      setPathname(path);
+      const result = resolveRoute(user?.role, path);
+      let tab: AppTab | undefined;
+      if (result.area === "patient") {
+        // The portal landing URL restores the last tab in this browser tab.
+        tab = /^\/patient\/?$/.test(path)
+          ? store.getState().ui.currentTab
+          : result.page === "overview"
+            ? "dashboard"
+            : result.page === "profiles"
+              ? "profile"
+              : result.page;
+      } else if (result.area === "staff") {
+        tab = path === "/" ? store.getState().ui.currentTab : result.tab;
+      }
+      if (tab) {
+        readingUrl = true;
+        dispatch(setCurrentTab(tab));
+        previousTab = tab;
+        readingUrl = false;
+        const canonical =
+          result.area === "patient" ? patientTabPaths[tab] : `/${tab}`;
+        if (path !== canonical) {
+          window.history.replaceState(
+            null,
+            "",
+            canonical + window.location.search + window.location.hash,
+          );
+          setPathname(canonical);
+        }
+      }
+    };
+    syncFromUrl();
+    const unsubscribe = store.subscribe(() => {
+      const tab = store.getState().ui.currentTab;
+      if (tab === previousTab) return;
+      previousTab = tab;
+      if (readingUrl) return;
+      const result = resolveRoute(user?.role, window.location.pathname);
+      if (result.area !== "patient" && result.area !== "staff") return;
+      const path = result.area === "patient" ? patientTabPaths[tab] : `/${tab}`;
+      window.history.pushState(null, "", path);
+      setPathname(path);
+    });
+    window.addEventListener("popstate", syncFromUrl);
+    return () => {
+      unsubscribe();
+      window.removeEventListener("popstate", syncFromUrl);
+    };
+  }, [dispatch, user?.role]);
 
   useEffect(() => {
     if (isAuthCallback) {
@@ -147,6 +209,17 @@ const AppContent: React.FC = () => {
     return <AuthPage />;
   }
 
+  const route = resolveRoute(user?.role, pathname);
+  if (route.area === "redirect") {
+    window.location.replace(route.path);
+    return null;
+  }
+  if (route.area === "denied")
+    return (
+      <Alert severity="error">Bạn không có quyền truy cập trang này.</Alert>
+    );
+  const patient = route.area === "patient";
+
   return (
     <Box
       sx={{
@@ -165,9 +238,20 @@ const AppContent: React.FC = () => {
         {currentTab === "doctors" && <DoctorDirectoryPage />}
         {currentTab === "booking" && <BookingPage />}
         {currentTab === "appointments" && <MyAppointmentsPage />}
-        {currentTab === "examinations" && <ExaminationsPage />}
-        {currentTab === "prescriptions" && <PrescriptionsPage />}
-        {currentTab === "invoices" && <InvoicesPage />}
+        {currentTab === "examinations" &&
+          (patient ? (
+            <PatientPortal page="examinations" />
+          ) : (
+            <ExaminationsPage />
+          ))}
+        {currentTab === "prescriptions" &&
+          (patient ? (
+            <PatientPortal page="prescriptions" />
+          ) : (
+            <PrescriptionsPage />
+          ))}
+        {currentTab === "invoices" &&
+          (patient ? <PatientPortal page="invoices" /> : <InvoicesPage />)}
         {currentTab === "api-audit" && <ApiAuditPage />}
       </Box>
 

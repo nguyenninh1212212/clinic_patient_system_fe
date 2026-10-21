@@ -45,6 +45,7 @@ export const demoAccessiblePatients: AccessDTO[] = [
     id: 'access-001',
     patientId: 'demo-patient-child',
     createdBy: 'demo-user-patient-001',
+    userId: 'demo-user-patient-001',
     createdAt: '2026-01-15T08:00:00Z',
     patient: {
       id: 'demo-patient-child',
@@ -59,6 +60,7 @@ export const demoAccessiblePatients: AccessDTO[] = [
     id: 'access-002',
     patientId: 'demo-patient-mother',
     createdBy: 'demo-user-patient-001',
+    userId: 'demo-user-patient-001',
     createdAt: '2026-02-10T10:00:00Z',
     patient: {
       id: 'demo-patient-mother',

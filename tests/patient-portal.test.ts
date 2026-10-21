@@ -111,7 +111,7 @@ test('staff patient invoice lookup sends server filter and pagination, never dow
   const { apiClient } = await import('../src/api/axios');
   const previousAdapter = apiClient.defaults.adapter;
   apiClient.defaults.adapter = async config => {
-    assert.equal(config.url, '/invoices');
+    assert.equal(config.url, '/legacy/invoices');
     assert.deepEqual(config.params, { page: 2, limit: 5, patientId: 'p1' });
     return { data: { data: [], pagination: { page: 2, limit: 5, total: 0, totalPages: 0 } }, status: 200, statusText: 'OK', config, headers: {} };
   };

@@ -1,3 +1,4 @@
+import { queryClient } from '@/api/queryClient';
 import { io, Socket } from 'socket.io-client';
 import { getApiBaseUrl } from '@/api/axios';
 import { RealtimeNotificationPayload } from '@/types/index';
@@ -19,7 +20,7 @@ export const connectNotificationsSocket = (
   }
 
   const baseUrl = getApiBaseUrl();
-  const socketUrl = `${baseUrl}/notifications`;
+  const socketUrl = new URL(baseUrl).origin;
 
   try {
     socket = io(socketUrl, {
@@ -32,9 +33,16 @@ export const connectNotificationsSocket = (
       reconnectionDelay: 2000,
     });
 
-    socket.on('connect', () => {
-      // Socket connected
-    });
+    socket.on('connect', () => { void queryClient.invalidateQueries({queryKey:['commerce']}); });
+    const seen=new Set<string>();
+    for(const name of ['PRESCRIPTION.ISSUED','INVOICE.CREATED','INVOICE.PAID','INVOICE.CANCELLED','PHARMACY.DISPENSING_REQUESTED','PHARMACY.DISPENSING_READY','PHARMACY.DISPENSING_COMPLETED']) {
+      socket.on(name,(event:{eventId?:string})=>{
+        if(event.eventId&&seen.has(event.eventId)) return;
+        if(event.eventId) seen.add(event.eventId);
+        if(seen.size>1000) seen.clear();
+        void queryClient.invalidateQueries({queryKey:['commerce']});
+      });
+    }
 
     socket.on('notification', (data: RealtimeNotificationPayload) => {
       if (data && onNotificationReceived) {
