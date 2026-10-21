@@ -130,7 +130,7 @@ export const InvoicesPage: React.FC = () => {
 
   const invoices = invoicesRes?.data || [];
   const pagination = invoicesRes?.pagination;
-  const myPatient = myPatientRes?.data;
+  const myPatient = myPatientRes;
   // const accessiblePatients = accessiblePatientsRes?.data || [];
 
   // Mutation: Create Invoice

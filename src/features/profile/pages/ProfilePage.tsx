@@ -48,7 +48,7 @@ export const ProfilePage: React.FC = () => {
 
   const { data: accessibleRes, isLoading: isAccessibleLoading, isError: isAccessibleError, refetch: refetchAccessible } = useAccessiblePatients();
 
-  const patient = myPatientRes?.data;
+  const patient = myPatientRes ?? undefined;
   const accessibleList = (accessibleRes?.data || []).filter(item => item.patient.id !== patient?.id);
   const { defaultPatientId, chooseDefault } = useDefaultPatientProfile(patient, accessibleRes?.data, !isMyPatientLoading && !isMyPatientError && !isAccessibleLoading && !isAccessibleError);
 

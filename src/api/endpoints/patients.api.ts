@@ -1,9 +1,11 @@
+import { normalizePatientAccess } from './patient-access.api';
 import { apiClient } from "@/api/axios";
 import {
   AccessDTO,
   ApiResponse,
   CreatePatientDto,
   PatientDTO,
+  PatientProfileRequestDTO,
   UpdatePatientDto,
 } from "@/types/index";
 
@@ -13,13 +15,13 @@ export const patientsApi = {
 
   getMyAccessiblePatients: (): Promise<ApiResponse<AccessDTO[]>> =>
     apiClient
-      .get<ApiResponse<AccessDTO[]>>("/user-patient-access/my-patients")
-      .then((r) => r.data),
+      .get<ApiResponse<AccessDTO[]>>("/patient-profile-access/my-patients")
+      .then((r) => ({ ...r.data, data: (r.data.data ?? []).map(normalizePatientAccess) })),
 
-  create: (dto: CreatePatientDto): Promise<PatientDTO> =>
-    apiClient.post("/patients", dto).then((r) => r.data.data),
+  create: (dto: CreatePatientDto): Promise<PatientProfileRequestDTO> =>
+    apiClient.post("/patients/profile-requests", dto).then((r) => r.data.data),
 
-  createMySelf: (dto: CreatePatientDto): Promise<PatientDTO> =>
+  createMySelf: (dto: CreatePatientDto): Promise<PatientProfileRequestDTO> =>
     apiClient.post("/patients/me", dto).then((r) => r.data.data),
 
   update: (id: string, dto: UpdatePatientDto): Promise<PatientDTO> =>

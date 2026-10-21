@@ -3,7 +3,10 @@ import type { IUser } from '@/types/auth.types';
 
 const accessTokenPayload = z.object({
   id: z.string().min(1),
-  role: z.enum(['USER', 'ADMIN', 'SUPER_ADMIN', 'STAFF', 'MANAGER', 'GUEST']),
+  sub: z.string().min(1),
+  accountType: z.literal('PATIENT'),
+  tokenUse: z.literal('ACCESS'),
+  role: z.literal('USER'),
   email: z.string(),
   fullName: z.string(),
   department: z.union([
@@ -22,11 +25,13 @@ export function decodeAccessToken(accessToken: string): IUser {
   const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
   const bytes = Uint8Array.from(atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, '=')), char => char.charCodeAt(0));
   const payload = accessTokenPayload.parse(JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes)));
+  if (payload.sub !== payload.id) throw new Error('Định danh access token không hợp lệ.');
   if (payload.exp * 1000 <= Date.now()) {
     throw new Error('Access token đã hết hạn.');
   }
   return {
     id: payload.id,
+    accountType: 'PATIENT',
     role: payload.role,
     email: payload.email,
     fullName: payload.fullName,

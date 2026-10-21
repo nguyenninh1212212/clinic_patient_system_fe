@@ -9,7 +9,7 @@ export const loginSchema = z.object({
 export const registerSchema = z.object({
   fullName: z.string().min(2, 'Vui lòng nhập họ và tên đầy đủ'),
   email: z.string().email('Địa chỉ email không đúng định dạng'),
-  password: z.string().min(1, 'Vui lòng nhập mật khẩu'),
+  password: z.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;

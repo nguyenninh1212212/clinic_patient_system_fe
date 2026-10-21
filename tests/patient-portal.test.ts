@@ -330,9 +330,9 @@ test('booking uses Vietnam time and prevents past slots while keeping booked slo
 
 test('access token decoding preserves Vietnamese names and maps backend department claims', async () => {
   const { decodeAccessToken } = await import('../src/features/auth/utils/decodeAccessToken');
-  const claims = { id: 'u1', role: 'USER', email: 'user@test.local', fullName: 'Nguyễn Văn An', department: { departmentCode: 'NỘI' }, exp: Math.floor(Date.now() / 1000) + 300 };
+  const claims = { id: 'u1', sub: 'u1', accountType: 'PATIENT', tokenUse: 'ACCESS', role: 'USER', email: 'user@test.local', fullName: 'Nguyễn Văn An', department: { departmentCode: 'NỘI' }, exp: Math.floor(Date.now() / 1000) + 300 };
   const token = (payload: unknown) => `eyJhbGciOiJIUzI1NiJ9.${Buffer.from(JSON.stringify(payload)).toString('base64url')}.signature`;
-  assert.deepEqual(decodeAccessToken(token(claims)), { id: 'u1', role: 'USER', email: claims.email, fullName: claims.fullName, department: 'NỘI' });
+  assert.deepEqual(decodeAccessToken(token(claims)), { id: 'u1', accountType: 'PATIENT', role: 'USER', email: claims.email, fullName: claims.fullName, department: 'NỘI' });
   assert.equal(decodeAccessToken(token({ ...claims, department: null })).department, null);
   assert.equal(decodeAccessToken(token({ ...claims, department: 'CARDIO' })).department, 'CARDIO');
   assert.throws(() => decodeAccessToken(token({ ...claims, exp: 1 })), /hết hạn/);

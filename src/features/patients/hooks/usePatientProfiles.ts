@@ -1,3 +1,4 @@
+import { patientAccessEndpoints, type ConfirmIdentityLinkDto } from '@/api/endpoints/patient-access.api';
 import { isAxiosError } from "axios";
 import type { CreatePatientDto, UpdatePatientDto } from "@/types/patient.types";
 import { useAppDispatch, useAppSelector } from "@/store/index";
@@ -80,14 +81,14 @@ function usePatientMutation<T, V>(
 export function useCreatePatient() {
   return usePatientMutation(
     (dto: CreatePatientDto) => patientsApi.create(dto),
-    "Thêm bệnh nhân thành công",
+    "Đã gửi yêu cầu hồ sơ. Vui lòng chờ nhân sự y tế xác minh trước khi sử dụng.",
   );
 }
 
 export function useCreatePatientForMySelf() {
   return usePatientMutation(
     (dto: CreatePatientDto) => patientsApi.createMySelf(dto),
-    "Thêm bệnh nhân thành công",
+    "Đã gửi yêu cầu hồ sơ. Vui lòng chờ nhân sự y tế xác minh trước khi sử dụng.",
   );
 }
 export function useUpdatePatientForMySelf() {
@@ -110,5 +111,12 @@ export function useDeletePatient() {
   return usePatientMutation(
     (id: string) => patientsApi.remove(id),
     "Đã xóa hồ sơ bệnh nhân",
+  );
+}
+
+export function useConfirmPatientIdentityLink() {
+  return usePatientMutation(
+    (dto: ConfirmIdentityLinkDto) => patientAccessEndpoints.confirmIdentity(dto),
+    "Đã xác minh OTP và liên kết hồ sơ chính chủ thành công.",
   );
 }

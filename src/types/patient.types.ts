@@ -12,10 +12,17 @@ export interface PatientDTO {
   identityNumber?: string;
   insuranceCode?: string;
   email?: string;
+  patientAccountId?: string;
+  /** @deprecated UI compatibility projection only; this is a patient account ID. */
   userId?: string;
 }
 
+export interface PatientProfileRequestDTO { id: string; status: string; patientAccountId: string; relationship: string; }
+
 export interface AccessDTO {
+  patientAccountId?: string;
+  accessLevel?: 'FULL_ACCESS' | 'BOOKING_ONLY' | 'ADMINISTRATIVE';
+  status?: 'ACTIVE' | 'PENDING_APPROVAL' | 'REVOKED';
   id: string;
   patientId: string;
   createdBy?: string;

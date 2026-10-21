@@ -1,6 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { getAccessToken, setMemoryAccessToken, store } from '@/store/index';
-import { logoutAction, setAccessToken } from '@/store/slices/authSlice';
+import { logoutAction, setCredentials } from '@/store/slices/authSlice';
+import { decodeAccessToken } from '@/features/auth/utils/decodeAccessToken';
 
 export const getApiBaseUrl = (): string => {
   if (typeof window !== 'undefined') {
@@ -59,7 +60,7 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor: Handle 401 & silent refresh token via /auth/refresh-token
+// Response interceptor: Handle 401 & silent refresh token via /auth/patient/refresh
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -67,16 +68,20 @@ apiClient.interceptors.response.use(
       _retry?: boolean;
     };
 
-    // If 401 on /auth/refresh-token or /auth/login itself, don't loop
+    // If 401 on /auth/patient/refresh or /auth/login itself, don't loop
     if (
-      originalRequest?.url?.includes('/auth/refresh-token') ||
+      originalRequest?.url?.includes('/auth/patient/refresh') ||
       originalRequest?.url?.includes('/auth/login') ||
+      originalRequest?.url?.includes('/auth/patients/login') ||
+      originalRequest?.url?.includes('/auth/patient/login') ||
+      originalRequest?.url?.includes('/auth/patient/register') ||
+      originalRequest?.url?.includes('/auth/patients/register') ||
       originalRequest?.url?.includes('/auth/register')
     ) {
       return Promise.reject(error);
     }
 
-    if (error.response?.status === 401 && !originalRequest?._retry) {
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -96,14 +101,15 @@ apiClient.interceptors.response.use(
       try {
         // Send refresh token request with credentials (HTTP-only cookie)
         const refreshResponse = await axios.post<{ accessToken: string }>(
-          `${getApiBaseUrl()}/auth/refresh-token`,
+          `${getApiBaseUrl()}/auth/patient/refresh`,
           {},
           { withCredentials: true }
         );
 
         const newAccessToken = refreshResponse.data.accessToken;
+        const user = decodeAccessToken(newAccessToken);
         setMemoryAccessToken(newAccessToken);
-        store.dispatch(setAccessToken(newAccessToken));
+        store.dispatch(setCredentials({ user, accessToken: newAccessToken }));
 
         processQueue(null, newAccessToken);
 

@@ -110,7 +110,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
     queryFn: () => doctorsApi.getDoctors({ page: 1, limit: 100 }),
   });
 
-  const myPatient = myPatientRes?.data;
+  const myPatient = myPatientRes;
   const accessibleList = (accessiblePatientsRes?.data || []).filter(
     (item) => item.patient.id !== myPatient?.id,
   );

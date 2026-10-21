@@ -1,3 +1,6 @@
+import { isAxiosError } from 'axios';
+import { patientAccessEndpoints } from '@/api/endpoints/patient-access.api';
+import { useConfirmPatientIdentityLink } from '../hooks/usePatientProfiles';
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -17,9 +20,9 @@ import {
   type PatientFormData,
   type PatientRecipient,
 } from "../schemas/patient.schema";
-import { CreatePatientDto, PatientDTO, UpdatePatientDto } from "@/types";
+import { CreatePatientDto, PatientProfileRequestDTO, PatientDTO, UpdatePatientDto } from "@/types";
 import { Gender } from "@/types/enum";
-import { UseMutationResult } from "@tanstack/react-query";
+import { useMutation, type UseMutationResult } from "@tanstack/react-query";
 
 interface Props {
   open: boolean;
@@ -29,7 +32,7 @@ interface Props {
   patient?: PatientDTO;
   onClose: () => void;
   createProfile: UseMutationResult<
-    PatientDTO,
+    PatientProfileRequestDTO,
     Error,
     CreatePatientDto,
     unknown
@@ -57,6 +60,7 @@ export function PatientProfileDialog({
 }: Props) {
   const {
     register,
+    getValues,
     control,
     handleSubmit,
     reset,
@@ -75,7 +79,37 @@ export function PatientProfileDialog({
   });
 
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const pending = createProfile.isPending || updateProfile.isPending;
+  const linkingSelf = !patient && recipient === "self";
+  const [challenge, setChallenge] = useState<{ challengeId: string; expiresAt: string } | null>(null);
+  const [otp, setOtp] = useState("");
+  const requestOtp = useMutation({ mutationFn: patientAccessEndpoints.requestIdentityOtp });
+  const confirmIdentity = useConfirmPatientIdentityLink();
+  const pending = createProfile.isPending || updateProfile.isPending || requestOtp.isPending || confirmIdentity.isPending;
+
+  const identityError = (error: unknown) => setSubmitError(
+    isAxiosError(error) && typeof error.response?.data?.message === "string"
+      ? error.response.data.message : "Không thể xác minh hồ sơ. Vui lòng thử lại.",
+  );
+  const sendOtp = () => {
+    const identityNumber = getValues("identityNumber")?.trim() ?? "";
+    setSubmitError(null);
+    if (identityNumber.length < 6 || identityNumber.length > 20) {
+      setSubmitError("Vui lòng nhập số CCCD / CMND hợp lệ (6–20 ký tự).");
+      return;
+    }
+    requestOtp.mutate(identityNumber, {
+      onSuccess: (result) => { setChallenge(result); setOtp(""); },
+      onError: identityError,
+    });
+  };
+  const submitIdentityLink = () => {
+    setSubmitError(null);
+    if (!challenge) { sendOtp(); return; }
+    if (!/^\d{6}$/.test(otp)) { setSubmitError("Vui lòng nhập mã OTP gồm 6 chữ số."); return; }
+    confirmIdentity.mutate({ challengeId: challenge.challengeId, otp }, {
+      onSuccess: () => onClose(), onError: identityError,
+    });
+  };
 
   const onSubmit = (values: PatientFormData) => {
     const payload: CreatePatientDto = values;
@@ -95,6 +129,8 @@ export function PatientProfileDialog({
   useEffect(() => {
     if (open) {
       setSubmitError(null);
+      setChallenge(null);
+      setOtp("");
       reset({
         fullName:
           patient?.fullName ??
@@ -122,13 +158,18 @@ export function PatientProfileDialog({
         {patient
           ? "Sửa hồ sơ bệnh nhân"
           : recipient === "self"
-            ? "Tạo hồ sơ cho chính mình"
+            ? "Liên kết hồ sơ chính chủ"
             : "Tạo hồ sơ cho người nhà"}
       </DialogTitle>
       <form
-        onSubmit={handleSubmit((values) => {
-          if (!pending) onSubmit(values);
-        })}
+        onSubmit={(event) => {
+          if (linkingSelf) {
+            event.preventDefault();
+            if (!pending) submitIdentityLink();
+          } else {
+            void handleSubmit((values) => { if (!pending) onSubmit(values); })(event);
+          }
+        }}
         noValidate
       >
         <DialogContent>
@@ -136,6 +177,36 @@ export function PatientProfileDialog({
             {(submitError || error) && (
               <Alert severity="error">{submitError || error}</Alert>
             )}
+            {linkingSelf ? (
+              <>
+                <Alert severity="info">
+                  Nhập CCCD / CMND để liên kết hồ sơ. OTP sẽ được gửi qua Zalo của số điện thoại đã lưu trong hồ sơ bệnh nhân, có hiệu lực 5 phút.
+                </Alert>
+                <TextField
+                  label="CCCD / CMND"
+                  required
+                  {...register("identityNumber")}
+                  disabled={pending || !!challenge}
+                  slotProps={{ htmlInput: { maxLength: 20 } }}
+                />
+                {challenge && (
+                  <>
+                    <TextField
+                      label="Mã OTP"
+                      required
+                      value={otp}
+                      onChange={(event) => setOtp(event.target.value.replace(/\D/g, "").slice(0, 6))}
+                      autoComplete="one-time-code"
+                      slotProps={{ htmlInput: { inputMode: "numeric", maxLength: 6 } }}
+                      disabled={pending}
+                    />
+                    <Button onClick={sendOtp} disabled={pending}>Gửi lại OTP</Button>
+                    <Button onClick={() => { setChallenge(null); setOtp(""); setSubmitError(null); }} disabled={pending}>Đổi số định danh</Button>
+                  </>
+                )}
+              </>
+            ) : (
+              <>
             <TextField
               label="Họ và tên"
               required
@@ -205,6 +276,8 @@ export function PatientProfileDialog({
               multiline
               rows={2}
             />
+              </>
+            )}
           </Stack>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -213,7 +286,9 @@ export function PatientProfileDialog({
           </Button>
           <Button type="submit" variant="contained" disabled={pending}>
             {pending
-              ? "Đang lưu hồ sơ..."
+              ? linkingSelf ? "Đang xác minh..." : "Đang lưu hồ sơ..."
+              : linkingSelf
+                ? challenge ? "Xác nhận liên kết" : "Gửi mã OTP"
               : patient
                 ? "Lưu thay đổi"
                 : "Tạo hồ sơ"}
