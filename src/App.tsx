@@ -1,4 +1,3 @@
-import { InvoicesPage } from "@/features/invoices/pages/InvoicesPage";
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -49,9 +48,6 @@ import { ProfilePage } from "@/features/profile/pages/ProfilePage";
 import { DoctorDirectoryPage } from "@/features/documentation/doctors/pages/DoctorDirectoryPage";
 import { BookingPage } from "@/features/appointments/pages/BookingPage";
 import { MyAppointmentsPage } from "@/features/appointments/pages/MyAppointmentsPage";
-import { ExaminationsPage } from "@/features/examinations/pages/ExaminationsPage";
-import { PrescriptionsPage } from "@/features/prescriptions/pages/PrescriptionsPage";
-import { ApiAuditPage } from "@/features/documentation/pages/ApiAuditPage";
 
 import { PatientPortal } from "@/features/patient-portal/components/PatientPortal";
 import { patientTabPaths } from "@/store/tabPersistence";
@@ -82,16 +78,13 @@ const AppContent: React.FC = () => {
             : result.page === "profiles"
               ? "profile"
               : result.page;
-      } else if (result.area === "staff") {
-        tab = path === "/" ? store.getState().ui.currentTab : result.tab;
       }
       if (tab) {
         readingUrl = true;
         dispatch(setCurrentTab(tab));
         previousTab = tab;
         readingUrl = false;
-        const canonical =
-          result.area === "patient" ? patientTabPaths[tab] : `/${tab}`;
+        const canonical = patientTabPaths[tab];
         if (path !== canonical) {
           window.history.replaceState(
             null,
@@ -109,8 +102,8 @@ const AppContent: React.FC = () => {
       previousTab = tab;
       if (readingUrl) return;
       const result = resolveRoute(user?.role, window.location.pathname);
-      if (result.area !== "patient" && result.area !== "staff") return;
-      const path = result.area === "patient" ? patientTabPaths[tab] : `/${tab}`;
+      if (result.area !== "patient") return;
+      const path = patientTabPaths[tab];
       window.history.pushState(null, "", path);
       setPathname(path);
     });
@@ -218,8 +211,6 @@ const AppContent: React.FC = () => {
     return (
       <Alert severity="error">Bạn không có quyền truy cập trang này.</Alert>
     );
-  const patient = route.area === "patient";
-
   return (
     <Box
       sx={{
@@ -238,21 +229,9 @@ const AppContent: React.FC = () => {
         {currentTab === "doctors" && <DoctorDirectoryPage />}
         {currentTab === "booking" && <BookingPage />}
         {currentTab === "appointments" && <MyAppointmentsPage />}
-        {currentTab === "examinations" &&
-          (patient ? (
-            <PatientPortal page="examinations" />
-          ) : (
-            <ExaminationsPage />
-          ))}
-        {currentTab === "prescriptions" &&
-          (patient ? (
-            <PatientPortal page="prescriptions" />
-          ) : (
-            <PrescriptionsPage />
-          ))}
-        {currentTab === "invoices" &&
-          (patient ? <PatientPortal page="invoices" /> : <InvoicesPage />)}
-        {currentTab === "api-audit" && <ApiAuditPage />}
+        {currentTab === "examinations" && <PatientPortal page="examinations" />}
+        {currentTab === "prescriptions" && <PatientPortal page="prescriptions" />}
+        {currentTab === "invoices" && <PatientPortal page="invoices" />}
       </Box>
 
       {/* Mobile Drawer (Only shown when mobile menu is toggled) */}

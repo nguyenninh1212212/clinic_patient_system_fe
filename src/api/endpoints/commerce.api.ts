@@ -57,7 +57,7 @@ export interface PurchasePrescription {
     dosage: string;
     frequency: string;
     duration: string;
-    medicine: { name: string; unit: string };
+    medicine: { name: string; unit: string,sellingPrice:number };
   }[];
 }
 export const commerceApi = {

@@ -14,7 +14,7 @@ export function useMyPatient() {
   );
   const userId = user?.id ?? "";
   return useQuery({
-    queryKey: queryKeys.staff.resource("patient", userId),
+    queryKey: queryKeys.patient.profile(userId),
     queryFn: async () => {
       try {
         return await patientsApi.getMyPatient();
@@ -32,7 +32,7 @@ export function useAccessiblePatients() {
   );
   const userId = user?.id ?? "";
   return useQuery({
-    queryKey: queryKeys.staff.resource("user-patient-access", userId),
+    queryKey: queryKeys.patient.accessibleProfiles(userId),
     queryFn: patientsApi.getMyAccessiblePatients,
     enabled,
   });
@@ -45,19 +45,7 @@ function usePatientMutation<T, V>(
   return useCachedMutation(
     mutationFn,
     async (client, userId) => {
-      await client.invalidateQueries({
-        predicate: (query) => {
-          const [resource, scope, account] = query.queryKey;
-          if (resource === "patient-portal") return scope === userId;
-          if (
-            !["patient", "patients", "user-patient-access"].includes(
-              String(resource),
-            )
-          )
-            return false;
-          return scope !== "staff" || account === userId;
-        },
-      });
+      await client.invalidateQueries({ queryKey: queryKeys.patient.root(userId) });
     },
     {
       onError: (error) => {

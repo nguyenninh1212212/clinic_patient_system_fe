@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { AxiosError } from 'axios';
-import { resolveRoute, isStaffRole } from '../src/routes/access';
+import { resolveRoute } from '../src/routes/access';
 import { queryKeys } from '../src/api/queryKeys';
 import { queryClient } from '../src/api/queryClient';
 import { store } from '../src/store/index';
@@ -20,11 +20,10 @@ test('USER is confined to patient routes, including attempts to change invoice I
   }
 });
 
-test('confirmed staff roles retain internal pages; unknown roles fail closed', () => {
+test('staff and unknown roles cannot access the patient-only frontend', () => {
   for (const role of ['ADMIN', 'SUPER_ADMIN', 'STAFF', 'MANAGER']) {
-    assert.ok(isStaffRole(role));
     for (const path of ['/', '/invoices', '/prescriptions', '/booking', '/examinations']) {
-      assert.equal(resolveRoute(role, path).area, 'staff');
+      assert.equal(resolveRoute(role, path).area, 'denied');
     }
     assert.equal(resolveRoute(role, '/patient').area, 'denied');
   }

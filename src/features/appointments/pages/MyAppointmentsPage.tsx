@@ -85,34 +85,6 @@ export const MyAppointmentsPage: React.FC = () => {
           </Button>
         </Stack>
 
-        {/* Security / Ownership Status Notice */}
-        <Paper
-          variant="outlined"
-          sx={{
-            p: 2,
-            borderRadius: 2,
-            bgcolor: '#f8fafc',
-            borderColor: '#e2e8f0',
-          }}
-        >
-          <Stack direction="row" spacing={1.5} sx={{ alignItems: 'flex-start' }}>
-            <SecurityIcon sx={{ color: 'primary.main', fontSize: 20, mt: 0.25 }} />
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.primary', display: 'block', mb: 0.25 }}>
-                Phạm vi dữ liệu lịch hẹn (Data Ownership & Scope):
-              </Typography>
-              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', lineHeight: 1.4 }}>
-                Danh sách bên dưới được truy vấn từ endpoint chuyên biệt{' '}
-                <Box component="span" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>
-                  GET /appointments/my-bookings
-                </Box>{' '}
-                (các lịch do tài khoản hiện tại tạo). Cổng bệnh nhân tuân thủ nghiêm ngặt nguyên tắc bảo mật: không gọi API tra cứu chung hoặc hủy lịch khi backend chưa bổ sung kiểm tra quyền sở hữu tương ứng.
-              </Typography>
-            </Box>
-          </Stack>
-        </Paper>
-
-        {/* Status Filter Tabs */}
         <Paper variant="outlined" sx={{ borderRadius: 2, bgcolor: '#ffffff', borderColor: '#e2e8f0' }}>
           <Tabs
             value={selectedStatus}
@@ -125,11 +97,11 @@ export const MyAppointmentsPage: React.FC = () => {
             sx={{ px: 1 }}
           >
             <Tab label="Tất cả trạng thái" value="ALL" sx={{ fontWeight: 600, fontSize: '0.85rem' }} />
-            <Tab label="Chờ duyệt (PENDING)" value="PENDING" sx={{ fontWeight: 600, fontSize: '0.85rem' }} />
-            <Tab label="Đã xác nhận (CONFIRMED)" value="CONFIRMED" sx={{ fontWeight: 600, fontSize: '0.85rem' }} />
-            <Tab label="Đang khám (IN_EXAMINATION)" value="IN_EXAMINATION" sx={{ fontWeight: 600, fontSize: '0.85rem' }} />
-            <Tab label="Hoàn thành (COMPLETED)" value="COMPLETED" sx={{ fontWeight: 600, fontSize: '0.85rem' }} />
-            <Tab label="Đã hủy (CANCELLED)" value="CANCELLED" sx={{ fontWeight: 600, fontSize: '0.85rem' }} />
+            <Tab label="Chờ duyệt" value="PENDING" sx={{ fontWeight: 600, fontSize: '0.85rem' }} />
+            <Tab label="Đã xác nhận" value="CONFIRMED" sx={{ fontWeight: 600, fontSize: '0.85rem' }} />
+            <Tab label="Đang khá" value="IN_EXAMINATION" sx={{ fontWeight: 600, fontSize: '0.85rem' }} />
+            <Tab label="Hoàn thành" value="COMPLETED" sx={{ fontWeight: 600, fontSize: '0.85rem' }} />
+            <Tab label="Đã hủy" value="CANCELLED" sx={{ fontWeight: 600, fontSize: '0.85rem' }} />
           </Tabs>
         </Paper>
 

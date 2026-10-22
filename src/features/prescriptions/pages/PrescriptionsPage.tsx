@@ -206,7 +206,6 @@ export const PrescriptionsPage: React.FC = () => {
       }),
   });
 
-  // Query Prescription Items for detail prescription modal
   const { data: prescriptionItems, isLoading: isItemsLoading } = useQuery({
     queryKey: ["prescription-items", detailPrescription?.id],
     queryFn: () =>
@@ -214,7 +213,6 @@ export const PrescriptionsPage: React.FC = () => {
     enabled: Boolean(detailPrescription?.id),
   });
 
-  // Client-side filtering when pharmacyStatus is selected (as backend does not filter it yet)
   const rawPrescriptions = prescriptionsRes?.data || [];
   const prescriptions =
     clientPharmacyStatusFilter === "ALL"

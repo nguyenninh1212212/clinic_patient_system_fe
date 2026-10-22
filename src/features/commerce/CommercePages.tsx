@@ -75,12 +75,19 @@ function useRefresh() {
   return () => client.invalidateQueries({ queryKey: ["commerce"] });
 }
 
+function formatCurrency(amount:number, locale = 'vi-VN', currency = 'VND') {
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: currency,
+  }).format(amount);
+}
+
 export function PatientPrescriptionPurchases({
   patientId: providedId,
 }: {
   patientId?: string;
 }) {
-  const profile = useAppSelector((s) => s.profile);
+  const profile = useAppSelector((s) => s.profile) as any;
   const actorId = useAppSelector((s) => s.auth.user?.id);
   const patientId =
     providedId || profile.activePatientId || profile.defaultPatientId || "";
@@ -163,17 +170,17 @@ export function PatientPrescriptionPurchases({
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      {p.items.map((item) => (
-                        <Box key={item.id} sx={{ mb: 1 }}>
+                      {p.items.map((item) => {
+                        return <Box key={item.id} sx={{ mb: 1 }}>
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>
                             {item.medicine.name} · {item.quantity}{" "}
-                            {item.medicine.unit}
+                            {item.medicine.unit} · {formatCurrency(item.medicine.sellingPrice)}{" "}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
                             {item.dosage}, {item.frequency}, {item.duration}
                           </Typography>
-                        </Box>
-                      ))}
+                        </Box>;
+                      })}
                       {p.notes && (
                         <Typography variant="body2" color="text.secondary">
                           {p.notes}
@@ -400,7 +407,6 @@ export function CommerceInvoicesPage({ patientId }: { patientId: string }) {
     queryFn: () =>
       commerceApi.invoices({ patientId, page, search: search || undefined }),
     enabled: !!patientId,
-    refetchInterval: 10000,
   });
   return (
     <Container disableGutters maxWidth={false}>

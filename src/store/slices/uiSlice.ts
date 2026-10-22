@@ -9,8 +9,7 @@ export type AppTab =
   | 'appointments'
   | 'examinations'
   | 'prescriptions'
-  | 'invoices'
-  | 'api-audit';
+  | 'invoices';
 
 interface UiState {
   currentTab: AppTab;

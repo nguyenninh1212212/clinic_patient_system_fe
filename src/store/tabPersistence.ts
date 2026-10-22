@@ -10,7 +10,6 @@ const tabs: readonly AppTab[] = [
   "examinations",
   "prescriptions",
   "invoices",
-  "api-audit",
 ];
 
 export function restoreCurrentTab(): AppTab {
@@ -44,5 +43,4 @@ export const patientTabPaths: Record<AppTab, string> = {
   examinations: "/patient/examinations",
   prescriptions: "/patient/prescriptions",
   invoices: "/patient/invoices",
-  "api-audit": "/patient/api-audit",
 };

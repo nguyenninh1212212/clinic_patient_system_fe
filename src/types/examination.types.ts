@@ -8,6 +8,24 @@ export interface ExaminationDTO {
   icd10Code?: string;
   followUpDate?: string;
   examinedAt?: string;
+  appointment?: {
+    id: string;
+    appointmentDate?: string;
+    patient?: {
+      id: string;
+      fullName: string;
+      dateOfBirth?: string;
+      gender?: string;
+      phone?: string;
+    };
+  };
+  doctor?: {
+    id: string;
+    user?: {
+      id: string;
+      fullName: string;
+    };
+  };
   patient?: {
     id: string;
     fullName: string;

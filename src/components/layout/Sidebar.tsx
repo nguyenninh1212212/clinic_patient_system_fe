@@ -19,7 +19,6 @@ import EventNoteOutlinedIcon from "@mui/icons-material/EventNoteOutlined";
 import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
 import MedicationOutlinedIcon from "@mui/icons-material/MedicationOutlined";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
-import DnsOutlinedIcon from "@mui/icons-material/DnsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -96,16 +95,6 @@ const navGroups: NavGroup[] = [
         id: "profile",
         label: "Hồ sơ sức khỏe",
         icon: <BadgeOutlinedIcon fontSize="small" />,
-      },
-    ],
-  },
-  {
-    title: "HỆ THỐNG & KỸ THUẬT",
-    items: [
-      {
-        id: "api-audit",
-        label: "Trạng thái API & Kết nối",
-        icon: <DnsOutlinedIcon fontSize="small" />,
       },
     ],
   },

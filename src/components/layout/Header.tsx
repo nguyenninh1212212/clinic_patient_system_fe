@@ -23,7 +23,6 @@ import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import LogoutIcon from "@mui/icons-material/Logout";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
-import DnsOutlinedIcon from "@mui/icons-material/DnsOutlined";
 import SettingsEthernetIcon from "@mui/icons-material/SettingsEthernet";
 import AddIcon from "@mui/icons-material/Add";
 import { useAppDispatch, useAppSelector } from "@/store/index";
@@ -400,25 +399,6 @@ export const Header: React.FC = () => {
                     sx={{ color: "#475569" }}
                   />
                   <Typography variant="body2">Hồ sơ sức khỏe</Typography>
-                </Stack>
-              </MenuItem>
-
-              <MenuItem
-                onClick={() => {
-                  dispatch(setCurrentTab("api-audit"));
-                  setUserMenuAnchor(null);
-                }}
-                sx={{ borderRadius: 1.5 }}
-              >
-                <Stack
-                  direction="row"
-                  spacing={1.5}
-                  sx={{ alignItems: "center" }}
-                >
-                  <DnsOutlinedIcon fontSize="small" sx={{ color: "#475569" }} />
-                  <Typography variant="body2">
-                    Trạng thái API & Kết nối
-                  </Typography>
                 </Stack>
               </MenuItem>
 

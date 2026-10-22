@@ -9,6 +9,9 @@ export const queryKeys = {
   },
   patient: {
     root: (userId: string) => ["patient-portal", userId] as const,
+    profile: (userId: string) => ["patient-portal", userId, "profile"] as const,
+    accessibleProfiles: (userId: string) =>
+      ["patient-portal", userId, "accessible-profiles"] as const,
     profiles: (userId: string) =>
       ["patient-portal", userId, "my-patients"] as const,
     access: (userId: string, patientId: string) =>
@@ -20,4 +23,5 @@ export const queryKeys = {
       filters: { page: number; limit: number; search?: string },
     ) => ["patient-portal", userId, patientId, resource, filters] as const,
   },
+
 };
