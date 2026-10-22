@@ -50,7 +50,7 @@ export const AuthPage: React.FC = () => {
   };
   const beginSocialLogin = (provider: "google" | "facebook") => {
     window.location.assign(
-      `${getApiBaseUrl().replace(/\/+$/, "")}/auth/${provider}`,
+      `${getApiBaseUrl().replace(/\/+$/, "")}/auth/patients/${provider}`,
     );
   };
   const onLogin = async (data: LoginFormData) => {
