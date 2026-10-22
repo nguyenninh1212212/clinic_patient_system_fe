@@ -70,13 +70,9 @@ apiClient.interceptors.response.use(
 
     // If 401 on /auth/patient/refresh or /auth/login itself, don't loop
     if (
-      originalRequest?.url?.includes('/auth/patient/refresh') ||
-      originalRequest?.url?.includes('/auth/login') ||
+      originalRequest?.url?.includes('/auth/patients/refresh') ||
       originalRequest?.url?.includes('/auth/patients/login') ||
-      originalRequest?.url?.includes('/auth/patient/login') ||
-      originalRequest?.url?.includes('/auth/patient/register') ||
-      originalRequest?.url?.includes('/auth/patients/register') ||
-      originalRequest?.url?.includes('/auth/register')
+      originalRequest?.url?.includes('/auth/patients/register') 
     ) {
       return Promise.reject(error);
     }
@@ -101,7 +97,7 @@ apiClient.interceptors.response.use(
       try {
         // Send refresh token request with credentials (HTTP-only cookie)
         const refreshResponse = await axios.post<{ accessToken: string }>(
-          `${getApiBaseUrl()}/auth/patient/refresh`,
+          `${getApiBaseUrl()}/auth/patients/refresh`,
           {},
           { withCredentials: true }
         );

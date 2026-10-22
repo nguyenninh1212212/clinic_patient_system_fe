@@ -5,7 +5,7 @@ import { AuthResponse, IUser } from '@/types/index';
 
 export const authApi = {
   login: (credentials: { identifier: string; password: string }): Promise<AuthResponse> =>
-    apiClient.post<AuthResponse>('/auth/patient/login', credentials, {
+    apiClient.post<AuthResponse>('/auth/patients/login', credentials, {
       timeout: 3000,
     }).then((r) => requirePatientSession(r.data)),
 
@@ -14,22 +14,22 @@ export const authApi = {
     password: string;
     fullName: string;
   }): Promise<AuthResponse> =>
-    apiClient.post<AuthResponse>('/auth/patient/register', payload, {
+    apiClient.post<AuthResponse>('/auth/patients/register', payload, {
       timeout: 3000,
     }).then((r) => requirePatientSession(r.data)),
 
   getMe: (accessToken?: string): Promise<IUser> =>
-    apiClient.get<IUser>('/auth/patient/me', {
+    apiClient.get<IUser>('/auth/patients/me', {
       headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
     }).then((r) => requirePatientUser(r.data)),
 
   refreshToken: (): Promise<{ accessToken: string }> =>
     apiClient.post<{ accessToken: string }>(
-      '/auth/patient/refresh',
+      '/auth/patients/refresh',
       {},
       { timeout: 2000 }
     ).then((r) => { decodeAccessToken(r.data.accessToken); return r.data; }),
 
   logout: (): Promise<{ message: string }> =>
-    apiClient.post<{ message: string }>('/auth/patient/logout', {}).then((r) => r.data),
+    apiClient.post<{ message: string }>('/auth/patients/logout', {}).then((r) => r.data),
 };

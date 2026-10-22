@@ -22,7 +22,7 @@ test('patient authentication flow', async suite => {
       apiClient.defaults.adapter = async config => { urls.push(config.url!); return { data: { accessToken: token(), user: user() }, status: 200, statusText: 'OK', config, headers: {} }; };
       await authApi.login({ identifier: '0901234567', password: 'Password123' });
       await authApi.register({ email: 'new@test.local', fullName: 'New Patient', password: 'Password123' });
-      assert.deepEqual(urls, ['/auth/patient/login', '/auth/patient/register']);
+      assert.deepEqual(urls, ['/auth/patients/login', '/auth/patient/register']);
     });
     await suite.test('self-service linking sends only the identity number when requesting OTP', async () => {
       const requests: { url: string; data: unknown }[] = [];
@@ -51,7 +51,7 @@ test('patient authentication flow', async suite => {
     });
     await suite.test('medical responses are rejected for login, registration, and OAuth profile completion', async () => {
       for (const role of ['STAFF', 'MANAGER', 'ADMIN', 'SUPER_ADMIN', 'GUEST']) {
-        apiClient.defaults.adapter = async config => ({ data: config.url === '/auth/patient/me' ? user(role) : { accessToken: token(role), user: user(role) }, status: 200, statusText: 'OK', config, headers: {} });
+        apiClient.defaults.adapter = async config => ({ data: config.url === 's/me' ? user(role) : { accessToken: token(role), user: user(role) }, status: 200, statusText: 'OK', config, headers: {} });
         await assert.rejects(authApi.login({ identifier: 'medical@test.local', password: 'Password123' }));
         await assert.rejects(authApi.register({ email: 'medical@test.local', fullName: 'Medical', password: 'Password123' }));
         await assert.rejects(authApi.getMe(token(role)));
