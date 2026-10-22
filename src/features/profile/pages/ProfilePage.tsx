@@ -51,6 +51,10 @@ export const ProfilePage: React.FC = () => {
   const patient = myPatientRes ?? undefined;
   const accessibleList = (accessibleRes?.data || []).filter(item => item.patient.id !== patient?.id);
   const { defaultPatientId, chooseDefault } = useDefaultPatientProfile(patient, accessibleRes?.data, !isMyPatientLoading && !isMyPatientError && !isAccessibleLoading && !isAccessibleError);
+  const openSelfProfile = () => {
+    setRecipient("self");
+    setProfileDialogOpen(true);
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 3.5 }}>
@@ -87,7 +91,7 @@ export const ProfilePage: React.FC = () => {
             </Typography>
             <Button
               variant="outlined"
-              onClick={() => { setRecipient("self"); setProfileDialogOpen(true); }}
+              onClick={openSelfProfile}
               disabled={isMyPatientLoading}
             >
               {patient ? "Sửa hồ sơ cá nhân" : "Tạo hồ sơ cá nhân"}
@@ -148,7 +152,7 @@ export const ProfilePage: React.FC = () => {
                   sx={{ color: "text.secondary", lineHeight: 1.6 }}
                 >
                   Hệ thống không tìm thấy mã bệnh nhân tương ứng với tài khoản
-                  này. Nhấn “Tạo hồ sơ” để nhập thông tin bệnh nhân của bạn.
+                  này. Bạn có thể liên kết hồ sơ đã có hoặc tạo hồ sơ bệnh nhân mới.
                 </Typography>
               </Stack>
             </Paper>

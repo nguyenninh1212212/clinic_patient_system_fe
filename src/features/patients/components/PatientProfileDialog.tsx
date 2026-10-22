@@ -79,7 +79,9 @@ export function PatientProfileDialog({
   });
 
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const linkingSelf = !patient && recipient === "self";
+  const [selfProfileMode, setSelfProfileMode] = useState<"link" | "create" | null>(null);
+  const showSelfProfileOptions = !patient && recipient === "self" && selfProfileMode === null;
+  const linkingSelf = !patient && recipient === "self" && selfProfileMode === "link";
   const [challenge, setChallenge] = useState<{ challengeId: string; expiresAt: string } | null>(null);
   const [otp, setOtp] = useState("");
   const requestOtp = useMutation({ mutationFn: patientAccessEndpoints.requestIdentityOtp });
@@ -131,6 +133,7 @@ export function PatientProfileDialog({
       setSubmitError(null);
       setChallenge(null);
       setOtp("");
+      setSelfProfileMode(!patient && recipient === "self" ? null : "create");
       reset({
         fullName:
           patient?.fullName ??
@@ -155,7 +158,9 @@ export function PatientProfileDialog({
       maxWidth="sm"
     >
       <DialogTitle>
-        {patient
+        {showSelfProfileOptions
+          ? "Tạo hồ sơ cá nhân"
+          : patient
           ? "Sửa hồ sơ bệnh nhân"
           : recipient === "self"
             ? "Liên kết hồ sơ chính chủ"
@@ -177,7 +182,37 @@ export function PatientProfileDialog({
             {(submitError || error) && (
               <Alert severity="error">{submitError || error}</Alert>
             )}
-            {linkingSelf ? (
+            {showSelfProfileOptions ? (
+              <>
+                <Alert severity="info">
+                  Chọn cách thiết lập hồ sơ cá nhân của bạn.
+                </Alert>
+                <Button
+                  type="button"
+                  variant="outlined"
+                  size="large"
+                  onClick={() => setSelfProfileMode("link")}
+                  sx={{ justifyContent: "flex-start", textAlign: "left", p: 2 }}
+                >
+                  <Stack sx={{ alignItems: "flex-start" }}>
+                    <strong>Liên kết hồ sơ bằng CCCD/CMND</strong>
+                    <span>Hồ sơ đã có tại phòng khám; xác minh qua mã OTP.</span>
+                  </Stack>
+                </Button>
+                <Button
+                  type="button"
+                  variant="contained"
+                  size="large"
+                  onClick={() => setSelfProfileMode("create")}
+                  sx={{ justifyContent: "flex-start", textAlign: "left", p: 2 }}
+                >
+                  <Stack sx={{ alignItems: "flex-start" }}>
+                    <strong>Tạo hồ sơ mới</strong>
+                    <span>Nhập thông tin để gửi yêu cầu tạo hồ sơ bệnh nhân.</span>
+                  </Stack>
+                </Button>
+              </>
+            ) : linkingSelf ? (
               <>
                 <Alert severity="info">
                   Nhập CCCD / CMND để liên kết hồ sơ. OTP sẽ được gửi qua Zalo của số điện thoại đã lưu trong hồ sơ bệnh nhân, có hiệu lực 5 phút.
@@ -284,7 +319,7 @@ export function PatientProfileDialog({
           <Button onClick={onClose} disabled={pending}>
             Hủy
           </Button>
-          <Button type="submit" variant="contained" disabled={pending}>
+          {!showSelfProfileOptions && <Button type="submit" variant="contained" disabled={pending}>
             {pending
               ? linkingSelf ? "Đang xác minh..." : "Đang lưu hồ sơ..."
               : linkingSelf
@@ -292,7 +327,7 @@ export function PatientProfileDialog({
               : patient
                 ? "Lưu thay đổi"
                 : "Tạo hồ sơ"}
-          </Button>
+          </Button>}
         </DialogActions>
       </form>
     </Dialog>
