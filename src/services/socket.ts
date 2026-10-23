@@ -33,7 +33,9 @@ export const connectNotificationsSocket = (
       reconnectionDelay: 2000,
     });
 
-    socket.on('connect', () => { void queryClient.invalidateQueries({queryKey:['commerce']}); });
+    socket.on('connect', () => {
+      for (const key of ['commerce', 'notifications', 'appointments', 'prescriptions']) void queryClient.invalidateQueries({queryKey:[key]});
+    });
     const seen=new Set<string>();
     for(const name of ['PRESCRIPTION.ISSUED','INVOICE.CREATED','INVOICE.PAID','INVOICE.CANCELLED','PHARMACY.DISPENSING_REQUESTED','PHARMACY.DISPENSING_READY','PHARMACY.DISPENSING_COMPLETED']) {
       socket.on(name,(event:{eventId?:string})=>{

@@ -161,6 +161,8 @@ const AppContent: React.FC = () => {
         // Invalidate notifications queries
         queryClient.invalidateQueries({ queryKey: ["notifications"] });
         queryClient.invalidateQueries({ queryKey: ["appointments"] });
+        queryClient.invalidateQueries({ queryKey: ["commerce"] });
+        queryClient.invalidateQueries({ queryKey: ["prescriptions"] });
       });
     } else {
       disconnectNotificationsSocket();
