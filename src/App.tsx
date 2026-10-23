@@ -36,6 +36,7 @@ import {
 } from "@/services/socket";
 
 // Components
+import { PatientChatWidget } from "@/features/ai-chat/components/PatientChatWidget";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { NotificationDrawer } from "@/components/common/NotificationDrawer";
@@ -241,6 +242,7 @@ const AppContent: React.FC = () => {
       <NotificationDrawer />
       <BackendStatusModal />
       <ToastSnackbar />
+      <PatientChatWidget key={user?.id} />
     </Box>
   );
 };

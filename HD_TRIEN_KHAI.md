@@ -92,3 +92,9 @@ npm run dev
 ## 4. Kết Quả Kiểm Thử (Build & Typecheck)
 - **TypeScript Typecheck (`npm run lint`)**: Đạt `0 errors`, tương thích hoàn toàn với `@mui/material` v9.4.0, React 19 và strict mode.
 - **Vite Production Build (`npm run build`)**: Thành công 100%, tạo gói phân phối tối ưu trong thư mục `dist/`.
+
+## Chatbot tìm khoa khám
+
+Đã tích hợp khung chat nổi sau khi bệnh nhân đăng nhập. Hướng dẫn chạy FastAPI,
+cấu hình backend và kiểm thử tại
+[AI_CHAT.md](../clinic_management_system_be/AI_CHAT.md).

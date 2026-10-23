@@ -19,7 +19,7 @@ export type PatientPage = keyof typeof patientPages;
 
 export function resolveRoute(role: string | undefined, pathname: string) {
   if (isPatientRole(role)) {
-    if (pathname === "/")
+    if (pathname === "/" || pathname === "/login")
       return { area: "redirect", path: "/patient" } as const;
     const match =
       /^\/patient(?:\/(overview|profiles|doctors|booking|appointments|examinations|prescriptions|invoices))?\/?$/.exec(

@@ -15,6 +15,7 @@ test('USER is confined to patient routes, including attempts to change invoice I
     assert.equal(resolveRoute('USER', path).area, 'denied', path);
   }
   assert.deepEqual(resolveRoute('USER', '/'), { area: 'redirect', path: '/patient' });
+  assert.deepEqual(resolveRoute('USER', '/login'), { area: 'redirect', path: '/patient' });
   for (const page of ['', '/profiles', '/appointments', '/examinations', '/prescriptions', '/invoices']) {
     assert.equal(resolveRoute('USER', `/patient${page}`).area, 'patient');
   }
