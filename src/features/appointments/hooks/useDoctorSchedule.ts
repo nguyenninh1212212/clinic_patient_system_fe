@@ -8,7 +8,7 @@ function validatePage(result: PaginatedList<AppointmentSummary>) {
   if (!Array.isArray(result?.data) || !Number.isInteger(result.pagination?.totalPages) || result.pagination.totalPages < 0) {
     throw new Error('Không thể xác minh khung giờ khám.');
   }
-  if (result.data.some(entry => !entry.doctorId || !entry.status || !Number.isFinite(Date.parse(entry.appointmentDate)))) {
+  if (result.data.some(entry => !entry.doctor.id || !entry.status || !Number.isFinite(Date.parse(entry.appointmentDate)))) {
     throw new Error('Lịch khám không đúng định dạng.');
   }
   return result;

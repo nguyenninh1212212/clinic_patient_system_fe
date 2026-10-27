@@ -32,7 +32,7 @@ export interface AppointmentSummary {
     fullName: string;
     phone?: string;
   };
-  doctor?: {
+  doctor: {
     id: string;
     degree?: DoctorDegree;
     user?: {
