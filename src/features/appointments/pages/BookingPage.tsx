@@ -114,7 +114,14 @@ export const BookingPage: React.FC<BookingPageProps> = ({
   const accessibleList = (accessiblePatientsRes?.data || []).filter(
     (item) => item.patient.id !== myPatient?.id,
   );
-  const doctors = doctor ? [doctor] : doctorsRes?.data || [];
+  const listedDoctors = doctorsRes?.data || [];
+  // A chat recommendation may be outside the directory's first 100 entries.
+  const doctors = doctor
+    ? [doctor]
+    : selectedDoctorForBooking &&
+        !listedDoctors.some((item) => item.id === selectedDoctorForBooking.id)
+      ? [selectedDoctorForBooking, ...listedDoctors]
+      : listedDoctors;
 
   const {
     control,

@@ -36,7 +36,12 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 export const AuthPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const [tabIndex, setTabIndex] = useState(0);
-  const [apiError, setApiError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | null>(() =>
+    new URLSearchParams(window.location.search).get("error") ===
+    "oauth_state_invalid"
+      ? "Phiên đăng nhập Google/Facebook đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại."
+      : null,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),

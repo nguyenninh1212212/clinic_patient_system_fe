@@ -36,6 +36,7 @@ import {
 } from "@/services/socket";
 
 // Components
+import { PatientChatWidget } from "@/features/ai-chat/components/PatientChatWidget";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { NotificationDrawer } from "@/components/common/NotificationDrawer";
@@ -160,6 +161,8 @@ const AppContent: React.FC = () => {
         // Invalidate notifications queries
         queryClient.invalidateQueries({ queryKey: ["notifications"] });
         queryClient.invalidateQueries({ queryKey: ["appointments"] });
+        queryClient.invalidateQueries({ queryKey: ["commerce"] });
+        queryClient.invalidateQueries({ queryKey: ["prescriptions"] });
       });
     } else {
       disconnectNotificationsSocket();
@@ -241,6 +244,7 @@ const AppContent: React.FC = () => {
       <NotificationDrawer />
       <BackendStatusModal />
       <ToastSnackbar />
+      <PatientChatWidget key={user?.id} />
     </Box>
   );
 };
