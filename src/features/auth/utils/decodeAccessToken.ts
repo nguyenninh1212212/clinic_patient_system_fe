@@ -8,6 +8,7 @@ const accessTokenPayload = z.object({
   tokenUse: z.literal('ACCESS'),
   role: z.literal('USER'),
   email: z.string(),
+  phone: z.string().nullable().optional(),
   fullName: z.string(),
   department: z.union([
     z.string(),
@@ -34,6 +35,7 @@ export function decodeAccessToken(accessToken: string): IUser {
     accountType: 'PATIENT',
     role: payload.role,
     email: payload.email,
+    phone: payload.phone ?? null,
     fullName: payload.fullName,
     department: typeof payload.department === 'string'
       ? payload.department

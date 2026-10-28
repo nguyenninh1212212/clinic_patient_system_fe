@@ -21,8 +21,8 @@ test('patient authentication flow', async suite => {
       const urls: string[] = [];
       apiClient.defaults.adapter = async config => { urls.push(config.url!); return { data: { accessToken: token(), user: user() }, status: 200, statusText: 'OK', config, headers: {} }; };
       await authApi.login({ identifier: '0901234567', password: 'Password123' });
-      await authApi.register({ email: 'new@test.local', fullName: 'New Patient', password: 'Password123' });
-      assert.deepEqual(urls, ['/auth/patients/login', '/auth/patient/register']);
+      await authApi.register({ email: 'new@test.local', phone: '0901234567', fullName: 'New Patient', password: 'Password123' });
+      assert.deepEqual(urls, ['/auth/patients/login', '/auth/patients/register']);
     });
     await suite.test('self-service linking sends only the identity number when requesting OTP', async () => {
       const requests: { url: string; data: unknown }[] = [];
@@ -53,7 +53,7 @@ test('patient authentication flow', async suite => {
       for (const role of ['STAFF', 'MANAGER', 'ADMIN', 'SUPER_ADMIN', 'GUEST']) {
         apiClient.defaults.adapter = async config => ({ data: config.url === 's/me' ? user(role) : { accessToken: token(role), user: user(role) }, status: 200, statusText: 'OK', config, headers: {} });
         await assert.rejects(authApi.login({ identifier: 'medical@test.local', password: 'Password123' }));
-        await assert.rejects(authApi.register({ email: 'medical@test.local', fullName: 'Medical', password: 'Password123' }));
+        await assert.rejects(authApi.register({ email: 'medical@test.local', phone: '0901234567', fullName: 'Medical', password: 'Password123' }));
         await assert.rejects(authApi.getMe(token(role)));
         assert.throws(() => decodeAccessToken(token(role)));
       }
@@ -63,7 +63,7 @@ test('patient authentication flow', async suite => {
       axios.defaults.adapter = async () => { refreshCalls++; throw new Error('unexpected refresh'); };
       apiClient.defaults.adapter = async config => { throw new AxiosError('Unauthorized', 'ERR_BAD_REQUEST', config, undefined, { status: 401, data: {}, statusText: 'Unauthorized', headers: {}, config }); };
       await assert.rejects(authApi.login({ identifier: 'bad@test.local', password: 'bad' }));
-      await assert.rejects(authApi.register({ email: 'bad@test.local', fullName: 'Bad', password: 'Password123' }));
+      await assert.rejects(authApi.register({ email: 'bad@test.local', phone: '0901234567', fullName: 'Bad', password: 'Password123' }));
       assert.equal(refreshCalls, 0);
     });
     await suite.test('startup refresh cannot restore a medical session on the patient portal', async () => {

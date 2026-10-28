@@ -27,7 +27,14 @@ const loginSchema = z.object({
 });
 const registerSchema = z.object({
   fullName: z.string().min(2, "Vui lòng nhập họ và tên"),
-  email: z.string().email("Địa chỉ email không đúng định dạng"),
+  phone: z.string().trim().min(1, "Vui lòng nhập số điện thoại"),
+  email: z
+    .string()
+    .trim()
+    .refine(
+      (value) => !value || z.string().email().safeParse(value).success,
+      "Địa chỉ email không đúng định dạng",
+    ),
   password: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
 });
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -83,7 +90,8 @@ export const AuthPage: React.FC = () => {
       saveSession(
         await authApi.register({
           fullName: data.fullName.trim(),
-          email: data.email.trim(),
+          phone: data.phone.trim(),
+          ...(data.email.trim() ? { email: data.email.trim() } : {}),
           password: data.password,
         }),
       );
@@ -196,7 +204,17 @@ export const AuthPage: React.FC = () => {
                 />
                 <TextField
                   fullWidth
-                  label="Địa chỉ email"
+                  required
+                  label="Số điện thoại"
+                  type="tel"
+                  autoComplete="tel"
+                  error={Boolean(registerForm.formState.errors.phone)}
+                  helperText={registerForm.formState.errors.phone?.message}
+                  {...registerForm.register("phone")}
+                />
+                <TextField
+                  fullWidth
+                  label="Địa chỉ email (không bắt buộc)"
                   autoComplete="email"
                   error={Boolean(registerForm.formState.errors.email)}
                   helperText={registerForm.formState.errors.email?.message}

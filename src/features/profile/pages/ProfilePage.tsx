@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Box,
@@ -11,13 +11,16 @@ import {
   Button,
   Card,
   CardContent,
+  Chip,
   Divider,
 } from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { useAppSelector } from "@/store/index";
+import { useAppDispatch, useAppSelector } from "@/store/index";
+import { setUser } from "@/store/slices/authSlice";
 import { PatientProfileDialog } from "@/features/patients/components/PatientProfileDialog";
 import {
   useCreatePatient,
@@ -29,9 +32,17 @@ import {
 import axios from "axios";
 import type { PatientRecipient } from "@/features/patients/schemas/patient.schema";
 import { useDefaultPatientProfile } from "@/features/patients/hooks/useDefaultPatientProfile";
+import { AccountSettingsDialog } from "@/features/profile/components/AccountSettingsDialog";
+import { authApi } from "@/api/endpoints/auth.api";
+import { getApiBaseUrl } from "@/api/axios";
 
 export const ProfilePage: React.FC = () => {
+  const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
+  const [accountDialogOpen, setAccountDialogOpen] = useState(false);
+  const [providerLinkError, setProviderLinkError] = useState<string | null>(null);
+  const [providerBeingLinked, setProviderBeingLinked] = useState<"GOOGLE" | "FACEBOOK" | null>(null);
+  const [oauthFeedback, setOauthFeedback] = useState<"success" | "error" | null>(null);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const [recipient, setRecipient] = useState<PatientRecipient>("self");
   const createProfile = useCreatePatientForMySelf();
@@ -51,9 +62,46 @@ export const ProfilePage: React.FC = () => {
   const patient = myPatientRes ?? undefined;
   const accessibleList = (accessibleRes?.data || []).filter(item => item.patient.id !== patient?.id);
   const { defaultPatientId, chooseDefault } = useDefaultPatientProfile(patient, accessibleRes?.data, !isMyPatientLoading && !isMyPatientError && !isAccessibleLoading && !isAccessibleError);
+  const { data: providers, isError: isProvidersError, isLoading: isProvidersLoading } = useQuery({
+    queryKey: ["patient-portal", user?.id, "auth-providers"],
+    queryFn: () => authApi.getProviders(),
+    enabled: Boolean(user?.id),
+  });
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    const linked = query.get("oauth_link");
+    const error = query.get("oauth_error");
+    if (!linked && !error) return;
+    setOauthFeedback(linked === "success" ? "success" : "error");
+    query.delete("oauth_link");
+    query.delete("oauth_error");
+    const remaining = query.toString();
+    window.history.replaceState(
+      {},
+      document.title,
+      `${window.location.pathname}${remaining ? `?${remaining}` : ""}${window.location.hash}`,
+    );
+  }, []);
   const openSelfProfile = () => {
     setRecipient("self");
     setProfileDialogOpen(true);
+  };
+  const updateAccountUser = (nextUser: NonNullable<typeof user>) => {
+    dispatch(setUser(nextUser));
+  };
+  const beginProviderLink = async (provider: "GOOGLE" | "FACEBOOK") => {
+    setProviderLinkError(null);
+    setProviderBeingLinked(provider);
+    try {
+      const { url } = await authApi.beginProviderLink(provider);
+      if (!url.startsWith("/")) {
+        throw new Error("Invalid OAuth link URL");
+      }
+      window.location.assign(`${getApiBaseUrl().replace(/\/+$/, "")}${url}`);
+    } catch {
+      setProviderBeingLinked(null);
+      setProviderLinkError("Không thể bắt đầu liên kết tài khoản. Vui lòng thử lại.");
+    }
   };
 
   return (
@@ -72,6 +120,116 @@ export const ProfilePage: React.FC = () => {
             được cấp quyền ủy quyền
           </Typography>
         </Box>
+
+        <Paper
+          variant="outlined"
+          sx={{ p: { xs: 2.5, md: 3 }, borderRadius: 2.5, borderColor: "#cbd5e1" }}
+        >
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={2}
+            sx={{ alignItems: { sm: "center" }, justifyContent: "space-between", mb: 2.5 }}
+          >
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 700, fontSize: "1.05rem" }}>
+                Thông tin tài khoản
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Dùng email hoặc số điện thoại để đăng nhập.
+              </Typography>
+            </Box>
+            <Button variant="outlined" onClick={() => setAccountDialogOpen(true)} disabled={!user}>
+              Chỉnh sửa tài khoản
+            </Button>
+          </Stack>
+          {oauthFeedback === "success" && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              Liên kết tài khoản thành công.
+            </Alert>
+          )}
+          {oauthFeedback === "error" && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              Liên kết tài khoản không thành công. Vui lòng thử lại.
+            </Alert>
+          )}
+          {providerLinkError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {providerLinkError}
+            </Alert>
+          )}
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, display: "block" }}>
+                Họ và tên
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                {user?.fullName || "Chưa cập nhật"}
+              </Typography>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, display: "block" }}>
+                Số điện thoại
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                {user?.phone || "Chưa cập nhật"}
+              </Typography>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, display: "block" }}>
+                Email
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600, overflowWrap: "anywhere" }}>
+                {user?.email || "Chưa cập nhật"}
+              </Typography>
+            </Grid>
+          </Grid>
+          <Divider sx={{ my: 2.5 }} />
+          <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, display: "block", mb: 1 }}>
+            Phương thức liên kết
+          </Typography>
+          {isProvidersLoading ? (
+            <Typography variant="body2" color="text.secondary">
+              Đang tải trạng thái các phương thức liên kết…
+            </Typography>
+          ) : isProvidersError ? (
+            <Typography variant="body2" color="text.secondary">
+              Không thể tải trạng thái các phương thức liên kết.
+            </Typography>
+          ) : (
+            <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap", alignItems: "center" }}>
+              <Chip
+                size="small"
+                color={providers?.includes("LOCAL") ? "success" : "default"}
+                label={providers?.includes("LOCAL") ? "Số điện thoại / mật khẩu: đã thiết lập" : "Số điện thoại / mật khẩu: chưa thiết lập"}
+              />
+              {providers?.includes("GOOGLE") ? (
+                <Chip size="small" color="success" label="Google: đã liên kết" />
+              ) : (
+                <Button
+                  size="small"
+                  variant="outlined"
+                  disabled={providerBeingLinked !== null}
+                  onClick={() => void beginProviderLink("GOOGLE")}
+                >
+                  {providerBeingLinked === "GOOGLE" ? <CircularProgress size={16} color="inherit" /> : "Liên kết Google"}
+                </Button>
+              )}
+              {providers?.includes("FACEBOOK") ? (
+                <Chip size="small" color="success" label="Facebook: đã liên kết" />
+              ) : (
+                <Button
+                  size="small"
+                  variant="outlined"
+                  disabled={providerBeingLinked !== null}
+                  onClick={() => void beginProviderLink("FACEBOOK")}
+                  sx={{ borderColor: "#1877f2", color: "#1877f2" }}
+                >
+                  {providerBeingLinked === "FACEBOOK" ? <CircularProgress size={16} color="inherit" /> : "Liên kết Facebook"}
+                </Button>
+              )}
+            </Stack>
+          )}
+        </Paper>
 
         <Box>
           <Stack
@@ -586,6 +744,12 @@ export const ProfilePage: React.FC = () => {
         onClose={() => setProfileDialogOpen(false)}
         createProfile={recipient === "self" ? createProfile : createFamilyProfile}
         updateProfile={updateProfile}
+      />
+      <AccountSettingsDialog
+        open={accountDialogOpen}
+        user={user}
+        onClose={() => setAccountDialogOpen(false)}
+        onUpdated={updateAccountUser}
       />
     </Container>
   );
