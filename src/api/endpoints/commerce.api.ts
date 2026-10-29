@@ -81,12 +81,13 @@ export const commerceApi = {
     patientId: string;
     page: number;
     search?: string;
+    limit?: number;
   }): Promise<{
     data: PurchaseInvoice[];
     pagination: { totalPages: number };
   }> =>
     apiClient
-      .get("/invoices", { params: { ...params, limit: 20 } })
+      .get("/invoices", { params: { ...params, limit: params.limit ?? 20 } })
       .then((r) => r.data),
   invoice: (id: string): Promise<PurchaseInvoice> =>
     apiClient.get(`/invoices/${id}`).then((r) => r.data),

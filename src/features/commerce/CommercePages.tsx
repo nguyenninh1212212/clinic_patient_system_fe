@@ -99,6 +99,19 @@ export function PatientPrescriptionPurchases({
     queryFn: () => commerceApi.prescriptions(patientId),
     enabled: !!patientId,
   });
+  const invoiceQuery = useQuery({
+    queryKey: ["commerce", actorId, "invoices-by-prescription", patientId],
+    queryFn: () => commerceApi.invoices({ patientId, page: 1, limit: 100 }),
+    enabled: !!patientId,
+  });
+  const paidPrescriptionIds = new Set(
+    invoiceQuery.data?.data
+      .filter(
+        (invoice) =>
+          invoice.status === "PAID" && invoice.prescription_id !== null,
+      )
+      .map((invoice) => invoice.prescription_id) ?? [],
+  );
   const purchase = useMutation({
     mutationFn: ({
       id,
@@ -191,7 +204,14 @@ export function PatientPrescriptionPurchases({
                       <State value={p.status} />
                     </TableCell>
                     <TableCell sx={{ minWidth: 250 }}>
-                      {declined.includes(p.id) ? (
+                      {paidPrescriptionIds.has(p.id) ? (
+                        <Chip
+                          color="success"
+                          label="Đã thanh toán"
+                          size="small"
+                          variant="outlined"
+                        />
+                      ) : declined.includes(p.id) ? (
                         <Alert
                           severity="info"
                           action={
@@ -456,12 +476,22 @@ export function CommerceInvoicesPage({ patientId }: { patientId: string }) {
                     <State value={invoice.status} />
                   </TableCell>
                   <TableCell align="right">
+                    {invoice.status === "PAID" ? (
+                      <Button
+                        size="small"
+                        onClick={() => setSelected(invoice.id)}
+                        aria-label="Xem chi tiết hóa đơn đã thanh toán"
+                      >
+                        Xem chi tiết
+                      </Button>
+                    ) : (
                     <Button
                       size="small"
                       onClick={() => setSelected(invoice.id)}
                     >
                       Chi tiết / thanh toán
                     </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
