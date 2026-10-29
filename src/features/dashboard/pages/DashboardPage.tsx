@@ -751,7 +751,7 @@ export const DashboardPage: React.FC = () => {
                     <Typography
                       variant="body2"
                       sx={{ fontWeight: 600, fontSize: "0.85rem" }}
-                    >
+                    > 
                       {spec.name}
                     </Typography>
                   </Paper>
