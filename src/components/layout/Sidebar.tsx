@@ -1,42 +1,37 @@
-import React, { useState } from "react";
-import {
-  Box,
-  Drawer,
-  Typography,
-  Stack,
-  Button,
-  IconButton,
-  Divider,
-  Chip,
-  Tooltip,
-} from "@mui/material";
-import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
-import SpaceDashboardOutlinedIcon from "@mui/icons-material/SpaceDashboardOutlined";
-import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
-import PersonSearchOutlinedIcon from "@mui/icons-material/PersonSearchOutlined";
-import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
-import EventNoteOutlinedIcon from "@mui/icons-material/EventNoteOutlined";
-import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
-import MedicationOutlinedIcon from "@mui/icons-material/MedicationOutlined";
-import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import LogoutIcon from "@mui/icons-material/Logout";
-import SettingsEthernetIcon from "@mui/icons-material/SettingsEthernet";
-import CloseIcon from "@mui/icons-material/Close";
-import { useAppDispatch, useAppSelector } from "@/store/index";
+import { authApi } from "@/api/endpoints/auth.api";
+import { setMemoryAccessToken, useAppDispatch, useAppSelector } from "@/store/index";
+import { logoutAction } from "@/store/slices/authSlice";
+import { clearActiveProfile } from "@/store/slices/profileSlice";
 import {
   AppTab,
   setCurrentTab,
   setMobileSidebarOpen,
   setServerConfigModalOpen,
 } from "@/store/slices/uiSlice";
-import { logoutAction } from "@/store/slices/authSlice";
-import { clearActiveProfile } from "@/store/slices/profileSlice";
-import { authApi } from "@/api/endpoints/auth.api";
-import { setMemoryAccessToken } from "@/store/index";
-import { PatientProfileMenu } from "@/features/patients/components/PatientProfileMenu";
+import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
+import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
+import CloseIcon from "@mui/icons-material/Close";
+import EventNoteOutlinedIcon from "@mui/icons-material/EventNoteOutlined";
+import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
+import LogoutIcon from "@mui/icons-material/Logout";
+import MedicationOutlinedIcon from "@mui/icons-material/MedicationOutlined";
+import PersonSearchOutlinedIcon from "@mui/icons-material/PersonSearchOutlined";
+import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
+import SettingsEthernetIcon from "@mui/icons-material/SettingsEthernet";
+import SpaceDashboardOutlinedIcon from "@mui/icons-material/SpaceDashboardOutlined";
+import {
+  Box,
+  Button,
+  Chip,
+  Divider,
+  Drawer,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import React, { useState } from "react";
 
 interface NavGroup {
   title: string;
@@ -195,70 +190,7 @@ export const Sidebar: React.FC = () => {
         </IconButton>
       </Box>
 
-      {/* Active Patient Switcher Section */}
-      <Box sx={{ p: 2, bgcolor: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
-        <Typography
-          variant="caption"
-          sx={{
-            color: "text.secondary",
-            fontWeight: 700,
-            display: "block",
-            mb: 0.75,
-          }}
-        >
-          HỒ SƠ ĐANG KHÁM
-        </Typography>
-
-        <Button
-          fullWidth
-          size="small"
-          variant="outlined"
-          onClick={(e) => setProfileMenuAnchor(e.currentTarget)}
-          endIcon={<ArrowDropDownIcon />}
-          startIcon={
-            isRelative ? (
-              <FamilyRestroomIcon sx={{ fontSize: 18, color: "#db2777" }} />
-            ) : (
-              <PersonOutlinedIcon
-                sx={{ fontSize: 18, color: "primary.main" }}
-              />
-            )
-          }
-          sx={{
-            justifyContent: "space-between",
-            py: 0.8,
-            px: 1.5,
-            bgcolor: "#ffffff",
-            borderColor: "#cbd5e1",
-            borderRadius: 2,
-            textTransform: "none",
-            textAlign: "left",
-          }}
-        >
-          <Box sx={{ minWidth: 0, mr: 1 }}>
-            <Typography
-              variant="body2"
-              noWrap
-              sx={{ fontWeight: 700, color: "#0f172a" }}
-            >
-              {activePatientName || "Chọn hồ sơ"}
-            </Typography>
-            <Typography
-              variant="caption"
-              noWrap
-              sx={{ color: "text.secondary", display: "block" }}
-            >
-              {isRelative ? "Hồ sơ người thân" : "Hồ sơ của tôi"}
-            </Typography>
-          </Box>
-        </Button>
-
-        {/* Profile Switcher Menu */}
-        <PatientProfileMenu
-          anchorEl={profileMenuAnchor}
-          onClose={() => setProfileMenuAnchor(null)}
-        />
-      </Box>
+ 
 
       {/* Navigation Group Items */}
       <Box sx={{ flexGrow: 1, overflowY: "auto", p: 2 }}>

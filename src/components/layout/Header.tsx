@@ -258,7 +258,7 @@ export const Header: React.FC = () => {
           sx={{ alignItems: "center" }}
         >
           {/* Active Patient Switcher (Desktop and Tablet) */}
-          <Box sx={{ display: { xs: "none", sm: "block" } }}>
+          <Box sx={{ display: "none" }}>
             <Button
               size="small"
               variant="outlined"
@@ -294,16 +294,12 @@ export const Header: React.FC = () => {
               </Typography>
             </Button>
 
-            {/* Profile Dropdown Menu */}
-            <PatientProfileMenu
-              anchorEl={profileMenuAnchor}
-              onClose={() => setProfileMenuAnchor(null)}
-            />
+         
           </Box>
 
-          {/* Notifications Icon Button */}
           <Tooltip title="Thông báo hệ thống">
             <IconButton
+              id="notifications-trigger"
               size="small"
               onClick={() => dispatch(setNotificationDrawerOpen(true))}
               sx={{
@@ -409,17 +405,6 @@ export const Header: React.FC = () => {
                 }}
                 sx={{ borderRadius: 1.5 }}
               >
-                <Stack
-                  direction="row"
-                  spacing={1.5}
-                  sx={{ alignItems: "center" }}
-                >
-                  <SettingsEthernetIcon
-                    fontSize="small"
-                    sx={{ color: "#475569" }}
-                  />
-                  <Typography variant="body2">Cấu hình máy chủ</Typography>
-                </Stack>
               </MenuItem>
 
               <Divider sx={{ my: 1 }} />

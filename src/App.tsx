@@ -22,7 +22,6 @@ import {
 } from "@/store/index";
 import { appTheme } from "@/theme/theme";
 import { authApi } from "@/api/endpoints/auth.api";
-import { decodeAccessToken } from "@/features/auth/utils/decodeAccessToken";
 import {
   setCredentials,
   logoutAction,
@@ -40,7 +39,6 @@ import { PatientChatWidget } from "@/features/ai-chat/components/PatientChatWidg
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { NotificationDrawer } from "@/components/common/NotificationDrawer";
-import { BackendStatusModal } from "@/components/common/BackendStatusModal";
 import { ToastSnackbar } from "@/components/common/ToastSnackbar";
 import { AuthPage } from "@/features/auth/pages/AuthPage";
 import { AuthCallbackPage } from "@/features/auth/pages/AuthCallbackPage";
@@ -71,7 +69,6 @@ const AppContent: React.FC = () => {
       const result = resolveRoute(user?.role, path);
       let tab: AppTab | undefined;
       if (result.area === "patient") {
-        // The portal landing URL restores the last tab in this browser tab.
         tab = /^\/patient\/?$/.test(path)
           ? store.getState().ui.currentTab
           : result.page === "overview"
@@ -126,7 +123,8 @@ const AppContent: React.FC = () => {
         const refreshRes = await authApi.refreshToken();
         if (!isMounted) return;
         if (refreshRes?.accessToken) {
-          const user = decodeAccessToken(refreshRes.accessToken);
+          const user = await authApi.getMe(refreshRes.accessToken);
+          if (!isMounted) return;
           setMemoryAccessToken(refreshRes.accessToken);
           dispatch(
             setCredentials({ user, accessToken: refreshRes.accessToken }),
@@ -237,12 +235,9 @@ const AppContent: React.FC = () => {
         {currentTab === "invoices" && <PatientPortal page="invoices" />}
       </Box>
 
-      {/* Mobile Drawer (Only shown when mobile menu is toggled) */}
       <Sidebar />
 
-      {/* Global Modals & Notifications */}
       <NotificationDrawer />
-      <BackendStatusModal />
       <ToastSnackbar />
       <PatientChatWidget key={user?.id} />
     </Box>

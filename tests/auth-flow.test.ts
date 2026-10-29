@@ -66,15 +66,23 @@ test('patient authentication flow', async suite => {
       await assert.rejects(authApi.register({ email: 'bad@test.local', phone: '0901234567', fullName: 'Bad', password: 'Password123' }));
       assert.equal(refreshCalls, 0);
     });
-    await suite.test('startup refresh cannot restore a medical session on the patient portal', async () => {
-      apiClient.defaults.adapter = async config => ({ data: { accessToken: token('STAFF') }, status: 200, statusText: 'OK', config, headers: {} });
-      await assert.rejects(authApi.refreshToken());
+    await suite.test('startup refresh validates the session using the patient profile endpoint', async () => {
+      apiClient.defaults.adapter = async config => {
+        if (config.url === '/auth/patients/refresh') return { data: { accessToken: token('STAFF') }, status: 200, statusText: 'OK', config, headers: {} };
+        throw new Error(`Unexpected request: ${config.url}`);
+      };
+      const session = await authApi.refreshToken();
+      axios.defaults.adapter = async config => ({ data: user('STAFF'), status: 200, statusText: 'OK', config, headers: {} });
+      await assert.rejects(authApi.getMe(session.accessToken));
     });
     await suite.test('silent refresh with a medical cookie clears the local patient session', async () => {
       store.dispatch(setCredentials({ user: user() as never, accessToken: token() }));
       setMemoryAccessToken(token());
-      apiClient.defaults.adapter = async config => { throw new AxiosError('Expired', 'ERR_BAD_REQUEST', config, undefined, { status: 401, data: {}, statusText: 'Unauthorized', headers: {}, config }); };
-      axios.defaults.adapter = async config => ({ data: { accessToken: token('STAFF') }, status: 200, statusText: 'OK', config, headers: {} });
+      apiClient.defaults.adapter = async config => {
+        if (config.url === '/auth/patients/refresh') return { data: { accessToken: token('STAFF') }, status: 200, statusText: 'OK', config, headers: {} };
+        if (config.url === '/auth/patients/me') return { data: user('STAFF'), status: 200, statusText: 'OK', config, headers: {} };
+        throw new AxiosError('Expired', 'ERR_BAD_REQUEST', config, undefined, { status: 401, data: {}, statusText: 'Unauthorized', headers: {}, config });
+      };
       await assert.rejects(apiClient.get('/private'));
       assert.equal(store.getState().auth.isAuthenticated, false);
       assert.equal(getAccessToken(), null);
@@ -85,12 +93,13 @@ test('patient authentication flow', async suite => {
       setMemoryAccessToken(oldToken);
       store.dispatch(setActiveProfile({ patientId: 'private-profile', patientName: 'Private', isRelative: true }));
       queryClient.setQueryData(['private-data'], ['old-patient-data']);
-      let calls = 0;
+      let privateAttempts = 0;
       apiClient.defaults.adapter = async config => {
-        if (++calls === 1) throw new AxiosError('Expired', 'ERR_BAD_REQUEST', config, undefined, { status: 401, data: {}, statusText: 'Unauthorized', headers: {}, config });
+        if (config.url === '/auth/patients/refresh') return { data: { accessToken: token('USER', 'new-patient') }, status: 200, statusText: 'OK', config, headers: {} };
+        if (config.url === '/auth/patients/me') return { data: user('USER', 'new-patient'), status: 200, statusText: 'OK', config, headers: {} };
+        if (privateAttempts++ === 0) throw new AxiosError('Expired', 'ERR_BAD_REQUEST', config, undefined, { status: 401, data: {}, statusText: 'Unauthorized', headers: {}, config });
         return { data: {}, status: 200, statusText: 'OK', config, headers: {} };
       };
-      axios.defaults.adapter = async config => ({ data: { accessToken: token('USER', 'new-patient') }, status: 200, statusText: 'OK', config, headers: {} });
       await apiClient.get('/private');
       assert.equal(store.getState().auth.user?.id, 'new-patient');
       assert.equal(store.getState().profile.activePatientId, null);

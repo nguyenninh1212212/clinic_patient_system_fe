@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Drawer,
   Box,
   Typography,
   IconButton,
@@ -11,6 +10,7 @@ import {
   ListItemText,
   Chip,
   CircularProgress,
+  Popover,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
@@ -43,13 +43,25 @@ export const NotificationDrawer: React.FC = () => {
   const unReadCount = data?.unRead || 0;
 
   return (
-    <Drawer
-      anchor="right"
+    <Popover
       open={notificationDrawerOpen}
+      anchorEl={() => document.getElementById('notifications-trigger')}
       onClose={() => dispatch(setNotificationDrawerOpen(false))}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       slotProps={{
         paper: {
-          sx: { width: { xs: '100%', sm: 420 }, p: 0, bgcolor: '#ffffff' },
+          sx: {
+            mt: 1,
+            width: { xs: 'calc(100vw - 16px)', sm: 420 },
+            maxWidth: '100%',
+            maxHeight: 'min(650px, calc(100dvh - 88px))',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            borderRadius: 3,
+            bgcolor: '#ffffff',
+          },
         },
       }}
     >
@@ -185,9 +197,9 @@ export const NotificationDrawer: React.FC = () => {
 
       <Box sx={{ p: 2, borderTop: '1px solid #e2e8f0', bgcolor: '#f8fafc' }}>
         <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', textAlign: 'center' }}>
-          Thông báo được đồng bộ thời gian thực qua kênh an toàn WebSocket.
+          
         </Typography>
       </Box>
-    </Drawer>
+    </Popover>
   );
 };

@@ -1,7 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { getAccessToken, setMemoryAccessToken, store } from '@/store/index';
 import { logoutAction, setCredentials } from '@/store/slices/authSlice';
-import { decodeAccessToken } from '@/features/auth/utils/decodeAccessToken';
+import { requirePatientUser } from '@/features/auth/utils/patient-session';
 
 export const getApiBaseUrl = (): string => {
   if (typeof window !== 'undefined') {
@@ -60,7 +60,7 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor: Handle 401 & silent refresh token via /auth/patient/refresh
+// Response interceptor: Handle 401 & silent refresh token via /auth/patients/refresh
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -71,6 +71,7 @@ apiClient.interceptors.response.use(
     // If 401 on /auth/patient/refresh or /auth/login itself, don't loop
     if (
       originalRequest?.url?.includes('/auth/patients/refresh') ||
+      originalRequest?.url?.includes('/auth/patients/me') ||
       originalRequest?.url?.includes('/auth/patients/login') ||
       originalRequest?.url?.includes('/auth/patients/register') 
     ) {
@@ -95,17 +96,19 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // Send refresh token request with credentials (HTTP-only cookie)
-        const refreshResponse = await axios.post<{ accessToken: string }>(
-          `${getApiBaseUrl()}/auth/patients/refresh`,
-          {},
-          { withCredentials: true }
-        );
-
-        const newAccessToken = refreshResponse.data.accessToken;
-        const user = decodeAccessToken(newAccessToken);
+        // Import lazily to avoid a circular dependency: authApi uses apiClient.
+        const { authApi } = await import('@/api/endpoints/auth.api');
+        const { accessToken: newAccessToken } = await authApi.refreshToken();
+        // Match the staff portal: the backend, not JWT claims decoded in the
+        // browser, is the authoritative source for the refreshed identity.
+        const user = await authApi.getMe(newAccessToken);
         setMemoryAccessToken(newAccessToken);
-        store.dispatch(setCredentials({ user, accessToken: newAccessToken }));
+        store.dispatch(
+          setCredentials({
+            user: requirePatientUser(user),
+            accessToken: newAccessToken,
+          }),
+        );
 
         processQueue(null, newAccessToken);
 

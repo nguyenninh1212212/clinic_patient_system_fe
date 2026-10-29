@@ -33,6 +33,7 @@ import { patientsApi } from "@/api/endpoints/patients.api";
 import { doctorsApi } from "@/api/endpoints/doctors.api";
 import { notificationsApi } from "@/api/endpoints/notifications.api";
 import { AppointmentStatus } from "@/types/index";
+import { renderMaterialIcon } from "@/components/helper/MaterialIconPicker";
 
 // Helper for status badge & text
 export const renderStatusBadge = (status: AppointmentStatus) => {
@@ -167,10 +168,10 @@ export const DashboardPage: React.FC = () => {
     (state) => state.profile,
   );
 
-  // const { data: patientRes } = useQuery({
-  //   queryKey: ["patient", "me"],
-  //   queryFn: patientsApi.getMyPatient,
-  // });
+  const { data: patient } = useQuery({
+    queryKey: ["patient", "me"],
+    queryFn: patientsApi.getMyPatient,
+  });
 
   const { data: bookingsRes, isLoading: isBookingsLoading } = useQuery({
     queryKey: ["appointments", "my-bookings", { page: 1, limit: 3 }],
@@ -188,7 +189,7 @@ export const DashboardPage: React.FC = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 3.5 }}>
       <Stack spacing={3.5}>
-        {/* <Paper
+        <Paper
           elevation={0}
           sx={{
             p: { xs: 2.5, md: 3.5 },
@@ -301,7 +302,7 @@ export const DashboardPage: React.FC = () => {
               </Typography>
             </Box>
           )}
-        </Paper> */}
+        </Paper>
 
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -645,7 +646,6 @@ export const DashboardPage: React.FC = () => {
             </Card>
           </Grid>
 
-          {/* Right Column: Recent Notifications & Clinic Notice */}
           <Grid size={{ xs: 12, md: 5 }}>
             <Stack spacing={3}>
               {/* Clinic Notes */}
@@ -746,7 +746,7 @@ export const DashboardPage: React.FC = () => {
                         justifyContent: "center",
                       }}
                     >
-                      <MedicalServicesIcon fontSize="small" />
+                     {renderMaterialIcon(spec.iconUrl ?? '',"small")}
                     </Box>
                     <Typography
                       variant="body2"
